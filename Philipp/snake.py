@@ -111,7 +111,7 @@ def controlled_run(wrapper):
                 game_action = 'w'
             else:
                 # Gather information on the current state of the game
-                game_state = {'snake_Head':snake_Head, 'snake_List':snake_List}
+                game_state = {'snake_Head':snake_Head, 'snake_List':snake_List, 'foodx':foodx, 'foody':foody}
                 # Pass it to controll()
                 game_action = wrapper.control(game_state)
 

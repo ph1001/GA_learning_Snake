@@ -28,6 +28,7 @@ class Wrapper():
 
         print('snake_List:', game_state['snake_List'])
         print('snake_Head:', game_state['snake_Head'])
+        print('food position:', game_state['foodx'], game_state['foody'])
            
         # Define a sight distance (number of squares counted from the edges of the snake's head; field of vision is a square as well)
         sight_dist = 3
@@ -39,9 +40,11 @@ class Wrapper():
         # Initialise a field of vision with all zeros
         fov = np.zeros((edge_length, edge_length))
         
-        # Give the snake's head and snake_List a shorter name
+        # Give the snake's head, snake_List, foodx, and foody shorter names
         s_head = game_state['snake_Head']
         s_list = game_state['snake_List']
+        fx, fy = game_state['foodx'], game_state['foody']
+        
 
         # Iterate over all elements of our field of vision array
         for i in range(edge_length):
@@ -50,12 +53,27 @@ class Wrapper():
                 # Decrement/increment our indices in such a way that they represent the relative position
                 rel_pos_x = j - sight_dist
                 rel_pos_y = i - sight_dist
+                # Get the values of the currently looked at field of vision element in our grid space
+                x = s_head[0] + rel_pos_x * snake_block
+                y = s_head[1] + rel_pos_y * snake_block
 
                 # Check if the currently looked at field of vision element contains a part of our snake
-                snake_body = [s_head[0] + rel_pos_x * snake_block, s_head[1] + rel_pos_y * snake_block] in s_list
+                snake_body = [x, y] in s_list
                 # If so, write -1 in the respective field of vision cell
                 if snake_body:
                     fov[i,j] = -1
+
+                # Check if the currently looked at field of vision element is outside the allowed grid
+                outside_grid = x >= dis_width or x < 0 or y >= dis_height or y < 0
+                # If so, write -1 in the respective field of vision cell
+                if outside_grid:
+                    fov[i,j] = -1
+
+                # Check if the currently looked at field of vision element contains food
+                food = (x == fx and y == fy)
+                # If so, write 1 in the respective field of vision cell
+                if food:
+                    fov[i,j] = 1
         print(fov)
 
         # Define some valid inputs (this will not be relevant anymore once the Neural Network is implemented)
