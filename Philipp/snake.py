@@ -1,5 +1,17 @@
 
-# This game is an adapted version of the snake game available here: https://github.com/shubham1710/snake-game-python
+# This game is an adapted version of the Snake game available here: https://github.com/shubham1710/snake-game-python
+
+dis_width = 800
+dis_height = 600
+snake_block = 10
+snake_speed = 5
+
+white = (255, 255, 255)
+yellow = (255, 255, 102)
+black = (0, 0, 0)
+red = (213, 50, 80)
+green = (0, 255, 0)
+blue = (50, 153, 213)
 
 def controlled_run(wrapper):
         
@@ -9,23 +21,10 @@ def controlled_run(wrapper):
     
     pygame.init()
     
-    white = (255, 255, 255)
-    yellow = (255, 255, 102)
-    black = (0, 0, 0)
-    red = (213, 50, 80)
-    green = (0, 255, 0)
-    blue = (50, 153, 213)
-    
-    dis_width = 800
-    dis_height = 600
-    
     dis = pygame.display.set_mode((dis_width, dis_height))
     pygame.display.set_caption('Shubham Snake Game')
     
     clock = pygame.time.Clock()
-    
-    snake_block = 10
-    snake_speed = 5
 
     font_style = pygame.font.SysFont("bahnschrift", 25)
     score_font = pygame.font.SysFont("comicsansms", 35)
@@ -105,10 +104,18 @@ def controlled_run(wrapper):
 
             # Adapted part:
 
-            # Get an action from our wrapper
-            game_action = wrapper.control()
+            # In the very first iteration, let snake simply go up automatically
+            # In all iterations afterwards, call function controll(), passing information on the current state of the game and get an action back
+            if snake_List == []:
+                print('First iteration - Snake goes up automatically.')
+                game_action = 'w'
+            else:
+                # Gather information on the current state of the game
+                game_state = {'snake_Head':snake_Head, 'snake_List':snake_List}
+                # Pass it to controll()
+                game_action = wrapper.control(game_state)
 
-            # And process it in the same way a keyboard input would have been processed in the original version above
+            # Process the action in the same way a keyboard input would have been processed in the original version of the game
             if game_action == 'a':
                 x1_change = -snake_block
                 y1_change = 0
