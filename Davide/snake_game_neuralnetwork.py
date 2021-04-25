@@ -25,7 +25,7 @@ def message(msg, color, dis_width, dis_height, font_style, dis):
     
 #MAIN GAME FUNCTION
 
-def gameLoop(model, speed = 15):
+def gameLoop(model, speed = 15, sight = 3):
     
     #SETTINGS FOR DISPLAY
     
@@ -69,10 +69,14 @@ def gameLoop(model, speed = 15):
     
     #GAME LOOP
     
+    clock.tick(snake_speed)
+    #Initializing moves and age variables
+    moves = 0
+    age = 0
+    
     while not game_over:
         
-        # end of game; not automatic yet need to change to return also
-        #the fitness
+        # end of game; not automatic; will need to remove for final version
         while game_close == True:
             dis.fill(blue)
             message("You Lost! Press C-Play Again or Q-Quit", red, dis_width, dis_height, font_style, dis)
@@ -84,98 +88,110 @@ def gameLoop(model, speed = 15):
                         game_over = True
                         game_close = False
                     if event.key == pygame.K_c:
-                        gameLoop(model, speed)
+                        gameLoop(model, snake_speed, sight)
+        
+                        
+        #Preparing input for the NN
+ 
+        #distances to walls
+        distance_hwall_u = dis_height -y1
+        distance_hwall_d = y1
+        distance_vwall_u = dis_width - x1
+        distance_vwall_d = x1
+        #distances to food
+        distance_food_y = foody - y1
+        distance_food_x = foodx - x1
+ 
+ 
+        #VISION MATRIX
+ 
+        # Define a sight distance (number of squares counted from the 
+        #edges of the snake's head; field of vision is a square as well)
+        sight_dist = sight
+        edge_length = 1+2*sight_dist
+ 
+        # Compute the "field of vision" of the snake; it is made up of 
+        #a square array with the length of 1+2*sight_dist
+        # Side note: Possible positions in the game grid (without hitting 
+        #the wall): Min: (0,0), Max: (790,590) - This is specified in snake.py
+        
+        # Initialise a field of vision with all zeros
+        fov = np.zeros((edge_length, edge_length))
+        
+        # Give the snake's head, snake_List, foodx, and foody shorter names
+        s_head = (x1, y1)
+        s_list = snake_List
+        fx, fy = (foodx, foody)
+ 
+ 
+         # Iterate over all elements of our field of vision array
+        for i in range(edge_length):
+             for j in range(edge_length):
+         
+                 # Decrement/increment our indices in such a way that they 
+                 #represent the relative position
+                 rel_pos_x = j - sight_dist
+                 rel_pos_y = i - sight_dist
+                 # Get the values of the currently looked at field of vision element in our grid space
+                 x = s_head[0] + rel_pos_x * snake_block
+                 y = s_head[1] + rel_pos_y * snake_block
+                 
+                 # Check if the currently looked at field of vision element contains a part of our snake
+                 snake_body = [x, y] in s_list
+                 # If so, write -1 in the respective field of vision cell
+                 if snake_body:
+                     fov[i,j] = -1
+                     
+                     # Check if the currently looked at field of vision element is outside the allowed grid
+                 outside_grid = x >= dis_width or x < 0 or y >= dis_height or y < 0
+                 # If so, write -1 in the respective field of vision cell
+                 if outside_grid:
+                     fov[i,j] = -1
+ 
+                 # Check if the currently looked at field of vision element contains food
+                 food = (x == fx and y == fy)
+                 # If so, write 1 in the respective field of vision cell
+                 if food:
+                     fov[i,j] = 1
+                     #print(fov)
+ 
+        input_nn = [distance_hwall_u, distance_hwall_d, distance_vwall_u, 
+                    distance_vwall_d, #distances to walls
+                    distance_food_y, distance_food_x, #distances to food
+                    x1, y1]#snake head
+ 
+        #Transorm input intpo np.array
+        input_nn = np.array(input_nn)
+        #Fixing the shape so it can be used for the NN
+        input_nn.shape = (1,8)
+        #Concatenating the vision matrix to the input array                
+        fov.shape = (1,49)
+        input_nn = np.concatenate((input_nn, fov), axis = 1)
+ 
+        #Producing output of the model, the output are probabilities
+        #for each move, using np.argmax to get the index of the 
+        #highest probability
+        output = np.argmax(model.predict(input_nn))
+ 
+        #print input and output through the game to check
+        print(f'Input : {input_nn[:,:8]}')
+        print(f'Vision matrix : \n {fov}')
+        print(f'Output : {output}')
+ 
+         #Increasing age and moves variables
+        age += 1
+        moves += 1
+         #After 50 moves without getting a fruit or dying the snake is 'stuck' therefore game is over
+        if moves == 50:
+            game_close = True
+        
+        print(f'Moves : {moves}, age : {age}')
                         
         #COMMAND LOOP
         for event in pygame.event.get():
-                
-                #Preparing input for the NN
-                
-                #distances to walls
-                distance_hwall_u = dis_height -y1
-                distance_hwall_d = y1
-                distance_vwall_u = dis_width - x1
-                distance_vwall_d = x1
-                #distances to food
-                distance_food_y = foody - y1
-                distance_food_x = foodx - x1
-            
-                
-               #VISION MATRIX
-                
-                # Define a sight distance (number of squares counted from the 
-                #edges of the snake's head; field of vision is a square as well)
-                sight_dist = 3
-                edge_length = 1+2*sight_dist
-        
-                # Compute the "field of vision" of the snake; it is made up of 
-                #a square array with the length of 1+2*sight_dist
-                # Side note: Possible positions in the game grid (without hitting 
-                #the wall): Min: (0,0), Max: (790,590) - This is specified in snake.py
-                
-                # Initialise a field of vision with all zeros
-                fov = np.zeros((edge_length, edge_length))
-                
-                # Give the snake's head, snake_List, foodx, and foody shorter names
-                s_head = (x1, y1)
-                s_list = snake_List
-                fx, fy = (foodx, foody)
-                
-        
-                # Iterate over all elements of our field of vision array
-                for i in range(edge_length):
-                    for j in range(edge_length):
-                        
-                        # Decrement/increment our indices in such a way that they 
-                        #represent the relative position
-                        rel_pos_x = j - sight_dist
-                        rel_pos_y = i - sight_dist
-                        # Get the values of the currently looked at field of vision element in our grid space
-                        x = s_head[0] + rel_pos_x * snake_block
-                        y = s_head[1] + rel_pos_y * snake_block
-        
-                        # Check if the currently looked at field of vision element contains a part of our snake
-                        snake_body = [x, y] in s_list
-                        # If so, write -1 in the respective field of vision cell
-                        if snake_body:
-                            fov[i,j] = -1
-        
-                        # Check if the currently looked at field of vision element is outside the allowed grid
-                        outside_grid = x >= dis_width or x < 0 or y >= dis_height or y < 0
-                        # If so, write -1 in the respective field of vision cell
-                        if outside_grid:
-                            fov[i,j] = -1
-        
-                        # Check if the currently looked at field of vision element contains food
-                        food = (x == fx and y == fy)
-                        # If so, write 1 in the respective field of vision cell
-                        if food:
-                            fov[i,j] = 1
-                #print(fov)
-                
-                input_nn = [distance_hwall_u, distance_hwall_d, distance_vwall_u, 
-                distance_vwall_d, #distances to walls
-                distance_food_y, distance_food_x, #distances to food
-                x1, y1]#snake head
-                
-                #Transorm input intpo np.array
-                input_nn = np.array(input_nn)
-                #Fixing the shape so it can be used for the NN
-                input_nn.shape = (1,8)
-                #Concatenating the vision matrix to the input array                
-                fov.shape = (1,49)
-                input_nn = np.concatenate((input_nn, fov), axis = 1)
-                
-                #Producing output of the model, the output are probabilities
-                #for each move, using np.argmax to get the index of the 
-                #highest probability
-                output = np.argmax(model.predict(input_nn))
-                
-                #print input and output through the game to check
-                print(f'Input : {input_nn}')
-                print(f'Output : {output}')
-                
-                
+
+
+                                    
                 #Command pad, moves the snake according to the output of the NN
                 if output == 0:
                     x1_change = -snake_block
@@ -204,6 +220,7 @@ def gameLoop(model, speed = 15):
         #CALCULATIONS OF OUTCOMES OF THE MOVE
         if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
             game_close = True
+            #game_over = True NEED TO CHANGE FOR FINAL VERSION
         x1 += x1_change
         y1 += y1_change
         dis.fill(blue)
@@ -218,6 +235,7 @@ def gameLoop(model, speed = 15):
         for x in snake_List[:-1]:
             if x == snake_Head:
                 game_close = True
+                #game_over = True NEED TO CHANGE FOR FINAL VERSION
                 
         our_snake(dis, black, snake_block, snake_List)
         Your_score(Length_of_snake - 1, yellow, score_font, dis)
@@ -228,11 +246,12 @@ def gameLoop(model, speed = 15):
             foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
             foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
             Length_of_snake += 1
+            #Resetting moves to 0
+            moves = 0
     
-        clock.tick(snake_speed)
         
-
     pygame.quit()
+    return Length_of_snake, moves
 
 
 
