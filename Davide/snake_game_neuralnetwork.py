@@ -101,8 +101,17 @@ def gameLoop(model, speed = 15, sight = 3):
         #distances to food
         distance_food_y = foody - y1
         distance_food_x = foodx - x1
- 
- 
+        
+        #SCALE INPUTS to [0,1]
+        distance_hwall_u = distance_hwall_u/dis_height
+        distance_hwall_d = distance_hwall_d/dis_height
+        distance_vwall_u = distance_vwall_u/dis_width
+        distance_vwall_d = distance_vwall_d/dis_width
+        distance_food_y = (distance_food_y + dis_height)/(2*dis_height)
+        distance_food_x = (distance_food_x + dis_width)/(2*dis_width)
+        snake_head_x_scaled = x1/dis_width
+        snake_head_y_scaled = y1/dis_height
+        
         #VISION MATRIX
  
         # Define a sight distance (number of squares counted from the 
@@ -158,7 +167,7 @@ def gameLoop(model, speed = 15, sight = 3):
         input_nn = [distance_hwall_u, distance_hwall_d, distance_vwall_u, 
                     distance_vwall_d, #distances to walls
                     distance_food_y, distance_food_x, #distances to food
-                    x1, y1]#snake head
+                    snake_head_x_scaled, snake_head_y_scaled]#snake head
  
         #Transorm input intpo np.array
         input_nn = np.array(input_nn)
@@ -182,7 +191,7 @@ def gameLoop(model, speed = 15, sight = 3):
         age += 1
         moves += 1
          #After 50 moves without getting a fruit or dying the snake is 'stuck' therefore game is over
-        if moves == 50:
+        if moves == 300:
             game_close = True
         
         print(f'Moves : {moves}, age : {age}')
