@@ -1,3 +1,16 @@
+#
+#
+#
+# Run everything by running this script.
+# For me it works best to click "Run" -> "Run Without Debugging" for that.
+# Also the game window always opend behind the editor for some reason.
+#
+# Please not that right now 'moves_till_stuck' is set to 100, which is quite low.
+# This can be changed in snake.py.
+#
+#
+#
+
 # This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
 # Import libraries and components from snake
@@ -5,23 +18,6 @@ from snake import controlled_run, dis_width, dis_height, snake_block, automatic_
 import numpy as np
 from keras import layers, models
 import math
-
-# Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
-def evolve(population, evolution_step):
-
-    # IMPLEMENT HERE: Genetic evolution of the population
-
-
-
-
-
-
-
-    # Update each individual's evolution_step by using evolution_step that is passed to this function
-    for indiv in population:
-        indiv.evolution_step = evolution_step
-
-    return population
 
 # Class Individual. Instances of this class play snake and make up a population.
 class Individual():
@@ -191,6 +187,73 @@ class Individual():
 
         return game_action
 
+class Population:
+    
+    def __init__(self, size, **kwargs):
+        self.individuals = []
+        self.size = size
+
+        # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
+        # of class Individual, which then will result in this individual playing snake.
+        for i in range(size):
+            individual = Individual(i+1, evolution_step)
+            self.individuals.append(individual)
+
+    # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
+    def evolve(population, evolution_step):
+
+        # IMPLEMENT HERE: Genetic evolution of the population
+
+
+
+        ########
+        # CODE #
+        ########
+
+
+
+        # Update each individual's evolution_step by using evolution_step that is passed to this function
+        for indiv in population:
+            indiv.evolution_step = evolution_step
+
+        return population
+
+    # Dave's evolve method. Will keep it here for now for inspiration
+    if False:
+        def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
+            for gen in range(gens):
+                new_pop = []
+                while len(new_pop) < self.size:
+                    parent1, parent2 = select(self), select(self)
+                    # Crossover
+                    if random() < co_p:
+                        offspring1, offspring2 = crossover(parent1, parent2)
+                    else:
+                        offspring1, offspring2 = parent1, parent2
+                    # Mutation
+                    if random() < mu_p:
+                        offspring1 = mutate(offspring1)
+                    if random() < mu_p:
+                        offspring2 = mutate(offspring2)
+
+                    new_pop.append(Individual(representation=offspring1))
+                    if len(new_pop) < self.size:
+                        new_pop.append(Individual(representation=offspring2))
+                if elitism == True:
+                    raise NotImplementedError
+
+                self.individuals = new_pop
+                print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
+
+    def __len__(self):
+        return len(self.individuals)
+
+    def __getitem__(self, position):
+        return self.individuals[position]
+
+    def __repr__(self):
+        return f"Population(size={len(self.individuals)}"
+
 # This is where the execution of this script starts.
 if __name__ == '__main__':
 
@@ -200,15 +263,9 @@ if __name__ == '__main__':
     # Initialise a boolean that says that evolution should go on
     keep_evolving = True
 
-    # Initialise an empty list for our population and define how large the population should be
-    population = []
+    # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
     pop_size = 2
-
-    # Create individuals and add them to the list. Creating an individual will execute the __init__ function of class Individual,
-    # which then will result in this individual playing snake
-    for i in range(pop_size):
-        individual = Individual(i+1, evolution_step)
-        population.append(individual)
+    population = Population(pop_size)
     
     # While we want to keep evolving... 
     while keep_evolving:
@@ -217,14 +274,15 @@ if __name__ == '__main__':
         evolution_step += 1
 
         # Evolve our population
-        population = evolve(population, evolution_step)
+        population.evolve(evolution_step)
 
         # Let evolved population play
         for i in population:
             i.play()
 
         # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached
-        if evolution_step >= 4:
+        # This is defined after how many evolutions steps the program terminates.
+        if evolution_step >= 3:
             keep_evolving = False
 
     # Print a final message to show that the program finished executing.
