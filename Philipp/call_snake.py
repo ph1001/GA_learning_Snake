@@ -29,7 +29,9 @@ class Individual():
     # Define a function that lets an individual play snake
     def play(self):
 
-        # Start the game
+        # Start the game by calling the function controlled_run from snake.py and receive the fitness resulting 
+        # from the games_to_play games played by this individual in this evolution step
+        # games_to_play is defined in snake.py
         fitness = controlled_run(self, self.ind_number, self.evolution_step)
         print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
 
@@ -222,7 +224,7 @@ if __name__ == '__main__':
             i.play()
 
         # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached
-        if evolution_step >= 2:
+        if evolution_step >= 4:
             keep_evolving = False
 
     # Print a final message to show that the program finished executing.
