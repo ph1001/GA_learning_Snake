@@ -25,7 +25,7 @@ red = (213, 50, 80)
 green = (0, 255, 0)
 blue = (50, 153, 213)
 
-# Define if we want the NNs to be in controll (True) or the user via w,a,s, and d (False)
+# Define if we want the NNs to be in control (True) or the user via w,a,s, and d (False)
 automatic_mode = True
 
 # Choose how many games should be played per individual and evolution step (the score will be the mean of the scores achieved in these games)
@@ -33,10 +33,6 @@ games_to_play = 2
 
 # Choose how many moves an individual is allowed to make until it is considered to be stuck
 moves_till_stuck = 100
-
-# Initialise a fitness list as a global variable
-#global fitness_list
-#fitness_list = []
 
 # Dfeine a function that executes games_to_play (defined above) games for a given individual and that returns a score computed as the average of the scores of these games
 def controlled_run(individual, ind_number, evolution_step):
@@ -271,7 +267,7 @@ def controlled_run(individual, ind_number, evolution_step):
         score = Length_of_snake - 1
 
         # Compute fitness of this game and store it in fitness_list
-        fitness = age*math.exp(score) #+ (2*random.random()-0.5)
+        fitness = age*math.exp(score)
         fitness_list.append(fitness)
 
         return fitness_list

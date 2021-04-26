@@ -6,9 +6,16 @@ import numpy as np
 from keras import layers, models
 import math
 
+# Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
 def evolve(population, evolution_step):
 
-    # IMPLEMENT HERE: Genetic evolvement of the population
+    # IMPLEMENT HERE: Genetic evolution of the population
+
+
+
+
+
+
 
     # Update each individual's evolution_step by using evolution_step that is passed to this function
     for indiv in population:
@@ -16,8 +23,10 @@ def evolve(population, evolution_step):
 
     return population
 
+# Class Individual. Instances of this class play snake and make up a population.
 class Individual():
 
+    # Define a function that lets an individual play snake
     def play(self):
 
         # Start the game
@@ -27,6 +36,7 @@ class Individual():
         # Update this individual's fitness
         self.fitness = fitness
 
+    # init function of class Individual
     def __init__(self, ind_number, evolution_step):
 
         # Give this individual a number
@@ -47,20 +57,24 @@ class Individual():
         # Play a game
         self.play()
 
+    # Define a function that communicates with snake.py. It is called from snake.py from inside the function gameLoop
     def control(self, game_state):
 
+        # Some printing for debugging purposes
         if detailed_console_outputs:
             print("control() was called.")
 
         # In the very first iteration, simply pass "up"
         if game_state['snake_List'] == []:
 
+            # Some printing for debugging purposes
             if detailed_console_outputs:
                 print('"Up" was passed automatically.')
             return 'w'
 
         # Process the information received about the current state of the game
 
+        # Some printing for debugging purposes
         if detailed_console_outputs:
             print('snake_List:', game_state['snake_List'])
             print('snake_Head:', game_state['snake_Head'])
@@ -68,6 +82,7 @@ class Individual():
            
         # Define a sight distance (number of squares counted from the edges of the snake's head; field of vision is a square as well)
         sight_dist = 3
+        # Compute the square's edge length
         edge_length = 1+2*sight_dist
 
         # Compute the "field of vision" of the snake; it is made up of a square array with the length of 1+2*sight_dist
@@ -86,7 +101,7 @@ class Individual():
         for i in range(edge_length):
             for j in range(edge_length):
                 
-                # Decrement/increment our indices in such a way that they represent the relative position
+                # Decrease our indices in such a way that they represent the relative position
                 rel_pos_x = j - sight_dist
                 rel_pos_y = i - sight_dist
                 # Get the values of the currently looked at field of vision element in our grid space
@@ -114,65 +129,67 @@ class Individual():
         # Rename head position
         x1 = s_head[0]
         y1 = s_head[1]
-        #foodx = fx
-        #foody = fy
-
-        foodx = 790
-        foody = 590
+        foodx = fx
+        foody = fy
 
         #distances to food
         distance_food_y = foody - y1
         distance_food_x = foodx - x1
 
-        # Create the NN's input
+        # Create the NN's input and compute its output
+        # Only in automatic mode though
+        if automatic_mode:
+            #SCALE INPUTS to [0,1]
+            distance_food_y_scaled = (distance_food_y + (dis_height - snake_block))/(2*(dis_height - snake_block))
+            distance_food_x_scaled = (distance_food_x + (dis_width - snake_block))/(2*(dis_width - snake_block))
+            snake_head_x_scaled = x1 / (dis_width - snake_block)
+            snake_head_y_scaled = y1 / (dis_height - snake_block)
 
-        #SCALE INPUTS to [0,1]
-        distance_food_y_scaled = (distance_food_y + (dis_height - snake_block))/(2*(dis_height - snake_block))
-        distance_food_x_scaled = (distance_food_x + (dis_width - snake_block))/(2*(dis_width - snake_block))
-        snake_head_x_scaled = x1 / (dis_width - snake_block)
-        snake_head_y_scaled = y1 / (dis_height - snake_block)
+            # Create the input with the distance to food and the snake's position first
+            input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
+                        snake_head_x_scaled, snake_head_y_scaled]#snake head
 
-        input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
-                    snake_head_x_scaled, snake_head_y_scaled]#snake head
+            # Transorm input intpo np.array
+            input_nn = np.array(input_nn)
+            # Fixing the shape so it can be used for the NN
+            input_nn.shape = (1,4)
+            # Concatenating the vision matrix to the input array                
+            fov.shape = (1,49)
+            input_nn = np.concatenate((input_nn, fov), axis = 1)
 
-        #Transorm input intpo np.array
-        input_nn = np.array(input_nn)
-        #Fixing the shape so it can be used for the NN
-        input_nn.shape = (1,4)
-        #Concatenating the vision matrix to the input array                
-        fov.shape = (1,49)
-        input_nn = np.concatenate((input_nn, fov), axis = 1)
-
-        #Producing output of the model, the output are probabilities
-        #for each move, using np.argmax to get the index of the 
-        #highest probability
-        output = np.argmax(self.model.predict(input_nn))
+            # Producing output of the model, the output are probabilities
+            # for each move, using np.argmax to get the index of the 
+            # highest probability
+            output = np.argmax(self.model.predict(input_nn))
  
-        #print input and output through the game to check
+        # Some printing for debugging purposes
+        # print input and output
         if detailed_console_outputs:
             print(f'Input without vision matrix: {input_nn[:,:4]}')
             print('Vision matrix:')
             print(fov)
             print(f'Output : {output}')
 
+        # If automatic_mode is False, the user is asked to provide an input (direction of the snake to go) via the keyboard with keys w, a, s, and d
         if not automatic_mode:
+
             # Define some valid inputs (this will not be relevant anymore once the Neural Network is implemented)
             valid_inputs = ['w','a','s','d']
-
             # Initialise a variable that scays if a valid input was received
             no_valid_input = True
-
             # Until a valid input was received, ask for one
             while no_valid_input:
                 game_action = str(input())
                 if game_action in valid_inputs:
                     no_valid_input = False
 
+        # If automatic_mode is True, use the NNs output as the decision on where to go next
         if automatic_mode:
             game_action = output
 
         return game_action
 
+# This is where the execution of this script starts.
 if __name__ == '__main__':
 
     # Initialise an evolution step counter
@@ -181,15 +198,17 @@ if __name__ == '__main__':
     # Initialise a boolean that says that evolution should go on
     keep_evolving = True
 
-    # Initialise an empty list for our population and define how large it should be
+    # Initialise an empty list for our population and define how large the population should be
     population = []
     pop_size = 2
 
+    # Create individuals and add them to the list. Creating an individual will execute the __init__ function of class Individual,
+    # which then will result in this individual playing snake
     for i in range(pop_size):
         individual = Individual(i+1, evolution_step)
         population.append(individual)
     
-    # While we want to keep evolving, 
+    # While we want to keep evolving... 
     while keep_evolving:
 
         # Increment evolution_step
@@ -206,5 +225,6 @@ if __name__ == '__main__':
         if evolution_step >= 2:
             keep_evolving = False
 
+    # Print a final message to show that the program finished executing.
     print()
     print('All done.')
