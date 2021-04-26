@@ -14,23 +14,23 @@ class Individual:
     def __init__(
         self,
         input_dim = 53,
-        representation=None,
+        weights = None,
         
     ):
         model = models.Sequential()
         model.add(layers.Dense(64, activation = 'relu', input_dim = input_dim))
         model.add(layers.Dense(4, activation = 'softmax'))
         
-        if representation != None:
-            model.set_weights(representation)
+        if weights != None:
+            model.set_weights(weights)
             
-        self.representation = model
+        self.model = model
         self.fitness = self.evaluate()
         self.input_dim = input_dim
         
         
     def evaluate(self):
-        score, age = gameLoop(self.representation, speed = 10000, verbose = False)
+        score, age = gameLoop(self.model, speed = 10000, verbose = False)
         self.evaluate = age*math.exp(score)
 
     def __getitem__(self, position):
