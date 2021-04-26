@@ -1,10 +1,23 @@
 # This game is an adapted version of the Snake game available here: https://github.com/shubham1710/snake-game-python
 
+# Import libraries
+import math
+import random
+
+# Decide wether or not we want detailed console outputs (for debugging)
+detailed_console_outputs = False
+
+# Define display width and heigth
 dis_width = 800
 dis_height = 600
-snake_block = 10
-snake_speed = 30
 
+# Define the width of one snake square
+snake_block = 10
+
+# Define the snake's moving speed (put it really high to execute the programm at max speed)
+snake_speed = 1000
+
+# Define some colors
 white = (255, 255, 255)
 yellow = (255, 255, 102)
 black = (0, 0, 0)
@@ -12,16 +25,29 @@ red = (213, 50, 80)
 green = (0, 255, 0)
 blue = (50, 153, 213)
 
+# Define if we want the NNs to be in controll (True) or the user via w,a,s, and d (False)
 automatic_mode = True
-games_to_play = 1
 
-def controlled_run(wrapper, model, ind_number, evolution_step):
+# Choose how many games should be played per individual and evolution step (the score will be the mean of the scores achieved in these games)
+games_to_play = 2
 
-    # Initialize a games counter
+# Choose how many moves an individual is allowed to make until it is considered to be stuck
+moves_till_stuck = 100
+
+# Initialise a fitness list as a global variable
+#global fitness_list
+#fitness_list = []
+
+# Dfeine a function that executes games_to_play (defined above) games for a given individual and that returns a score computed as the average of the scores of these games
+def controlled_run(individual, ind_number, evolution_step):
+
+    # Initialize a games counter as a global variable
     global games_counter
     games_counter = 0
-    print("Games counter initialised.")
-    print("Games counter:", games_counter)
+
+    if detailed_console_outputs:
+        print("Games counter initialised.")
+        print("Games counter:", games_counter)
         
     import pygame
     import time
@@ -65,13 +91,15 @@ def controlled_run(wrapper, model, ind_number, evolution_step):
         dis.blit(mesg, [dis_width / 6, dis_height / 3])
     
     
-    def gameLoop():
+    def gameLoop(fitness_list):
         
         # Increment the games counter
         global games_counter
         games_counter += 1
-        print("Games counter incremented.")
-        print("Games counter:", games_counter)
+
+        if detailed_console_outputs:
+            print("Games counter incremented.")
+            print("Games counter:", games_counter)
 
         game_over = False
         game_close = False
@@ -108,12 +136,12 @@ def controlled_run(wrapper, model, ind_number, evolution_step):
                                 game_over = True
                                 game_close = False
                             if event.key == pygame.K_c:
-                                gameLoop(games_counter)
+                                fitness_list = gameLoop(fitness_list)
 
                 if automatic_mode:
 
                     if games_counter < games_to_play:
-                        gameLoop()
+                        fitness_list = gameLoop(fitness_list)
                     else:
                         game_over = True
                         game_close = False
@@ -147,9 +175,11 @@ def controlled_run(wrapper, model, ind_number, evolution_step):
             # Adapted part:
 
             # In the very first iteration, let snake simply go up automatically
-            # In all iterations afterwards, call function controll(), passing information on the current state of the game and get an action back
+            # In all iterations afterwards, call function control(), passing information on the current state of the game and get an action back
             if snake_List == []:
-                print('First iteration - Snake goes up automatically.')
+                
+                if detailed_console_outputs:
+                    print('First iteration - Snake goes up automatically.')
                 if not automatic_mode:
                     game_action = 'w'
                 if automatic_mode:
@@ -157,8 +187,8 @@ def controlled_run(wrapper, model, ind_number, evolution_step):
             else:
                 # Gather information on the current state of the game
                 game_state = {'snake_Head':snake_Head, 'snake_List':snake_List, 'foodx':foodx, 'foody':foody}
-                # Pass it to controll()
-                game_action = wrapper.control(game_state, model)
+                # Pass it to control()
+                game_action = individual.control(game_state)
 
             if not automatic_mode:
                 # Process the action received from the user in the same way a keyboard input would have been processed in the original version of the game
@@ -193,11 +223,12 @@ def controlled_run(wrapper, model, ind_number, evolution_step):
             #Increasing age and moves variables
             age += 1
             moves += 1
-            #After 200 moves without getting a fruit or dying the snake is 'stuck' therefore game is over
-            if moves == 200:
+            # After moves_till_stuck moves without getting a fruit or dying the snake is 'stuck' therefore game is over
+            if moves == moves_till_stuck:
                 game_close = True
         
-            print(f'Moves : {moves}, age : {age}')
+            if detailed_console_outputs:
+                print(f'Moves : {moves}, age : {age}')
     
             # From here it's original code again
             if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
@@ -237,9 +268,22 @@ def controlled_run(wrapper, model, ind_number, evolution_step):
         #pygame.quit()
         #quit()
 
-        return Length_of_snake - 1, age
+        score = Length_of_snake - 1
+
+        # Compute fitness of this game and store it in fitness_list
+        fitness = age*math.exp(score) #+ (2*random.random()-0.5)
+        fitness_list.append(fitness)
+
+        return fitness_list
     
-    score, age = gameLoop()
+    fitness_list = []
+
+    fitness_list = gameLoop(fitness_list)
+    print()
+    print('Fitnesses of this/these', games_to_play, 'game(s):', fitness_list)
+
+    fitness = sum(fitness_list) / games_to_play
+    print('Resulting (mean) fitness', fitness)
 
     # Return fitness
-    return score, age
+    return fitness
