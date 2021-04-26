@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Apr 26 16:36:47 2021
+
+@author: utente
+"""
+
 #
 #
 #
@@ -17,8 +24,15 @@
 from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode, detailed_console_outputs
 import numpy as np
 from keras import layers, models
-import math
+import random
+from tqdm import tqdm
+from operator import  attrgetter
 
+
+##CHANGES BY DAVIDE: -added more arguments to the Individual class so everything can be controlled when creating individuals
+#                    -added set item and get item and repr to the Individual class
+   #                 - fixed the Population class, it was giving some errors
+   
 # Class Individual. Instances of this class play snake and make up a population.
 class Individual():
 
@@ -27,15 +41,22 @@ class Individual():
 
         # Start the game by calling the function controlled_run from snake.py and receive the fitness resulting 
         # from the games_to_play games played by this individual in this evolution step
-        # games_to_play is defined in snake.py
-        fitness = controlled_run(self, self.ind_number, self.evolution_step)
-        print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
+        # MOVED games_to_play here, defined together with the individual
+        fitness = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose)
+        if self.verbose:
+            print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
 
         # Update this individual's fitness
         self.fitness = fitness
 
     # init function of class Individual
-    def __init__(self, ind_number, evolution_step):
+    def __init__(self, 
+                 ind_number = random.randint(1,9),
+                 evolution_step = 1,
+                 input_dim = 53,
+                 sight_dist = 3,
+                 games_to_play = 1,
+                 verbose = False):
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -49,11 +70,26 @@ class Individual():
 
         # Create a neural network that will learn to play snake
         self.model = models.Sequential()
-        self.model.add(layers.Dense(64, activation = 'relu', input_dim = 53))
+        self.model.add(layers.Dense(64, activation = 'relu', input_dim = input_dim))
         self.model.add(layers.Dense(4, activation = 'softmax'))
 
+        self.weights = self.model.get_weights()
+        self.input_dim = input_dim
+        self.sight_dist = sight_dist
+        self.games_to_play = games_to_play
+        self.verbose = verbose
         # Play a game
         self.play()
+        
+    def __getitem__(self, position):
+        return self.weights[position]
+
+    def __setitem__(self, position, value):
+         self.weights[position] = value
+    
+    def __repr__(self):
+        return f'Neural Network with {self.input_dim} input nodes, {self.model.layers[0].weights[1].shape[0]} hidden layer neurons and {self.model.layers[1].weights[1].shape[0]} output layer neurons'
+         
 
     # Define a function that communicates with snake.py. It is called from snake.py from inside the function gameLoop
     def control(self, game_state):
@@ -79,7 +115,7 @@ class Individual():
             print('food position:', game_state['foodx'], game_state['foody'])
            
         # Define a sight distance (number of squares counted from the edges of the snake's head; field of vision is a square as well)
-        sight_dist = 3
+        sight_dist = self.sight_dist
         # Compute the square's edge length
         edge_length = 1+2*sight_dist
 
@@ -189,13 +225,16 @@ class Individual():
 
 class Population:
     
-    def __init__(self, size, **kwargs):
+    def __init__(self, 
+                 size,
+                 evolution_step = 1,
+                 **kwargs):
         self.individuals = []
         self.size = size
 
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
         # of class Individual, which then will result in this individual playing snake.
-        for i in range(size):
+        for i in tqdm(range(size)):
             individual = Individual(i+1, evolution_step)
             self.individuals.append(individual)
 
@@ -220,7 +259,7 @@ class Population:
 
     # Dave's evolve method. Will keep it here for now for inspiration
     if False:
-        def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
+        def evolve2(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
             for gen in range(gens):
                 new_pop = []
                 while len(new_pop) < self.size:
@@ -252,39 +291,39 @@ class Population:
         return self.individuals[position]
 
     def __repr__(self):
-        return f"Population(size={len(self.individuals)}"
+        return f"Population(size={len(self.individuals)})"
 
 # This is where the execution of this script starts.
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    # Initialise an evolution step counter
-    evolution_step = 1
+#     # Initialise an evolution step counter
+#     evolution_step = 1
 
-    # Initialise a boolean that says that evolution should go on
-    keep_evolving = True
+#     # Initialise a boolean that says that evolution should go on
+#     keep_evolving = True
 
-    # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
-    pop_size = 2
-    population = Population(pop_size)
+#     # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
+#     pop_size = 2
+#     population = Population(pop_size)
     
-    # While we want to keep evolving... 
-    while keep_evolving:
+#     # While we want to keep evolving... 
+#     while keep_evolving:
 
-        # Increment evolution_step
-        evolution_step += 1
+#         # Increment evolution_step
+#         evolution_step += 1
 
-        # Evolve our population
-        population.evolve(evolution_step)
+#         # Evolve our population
+#         population.evolve(evolution_step)
 
-        # Let evolved population play
-        for i in population:
-            i.play()
+#         # Let evolved population play
+#         for i in population:
+#             i.play()
 
-        # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached.
-        # For now this defines after how many evolutions steps the program terminates.
-        if evolution_step >= 3:
-            keep_evolving = False
+#         # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached.
+#         # For now this defines after how many evolutions steps the program terminates.
+#         if evolution_step >= 3:
+#             keep_evolving = False
 
-    # Print a final message to show that the program finished executing.
-    print()
-    print('All done.')
+#     # Print a final message to show that the program finished executing.
+#     print()
+#     print('All done.')
