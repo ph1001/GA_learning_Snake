@@ -1,19 +1,58 @@
-from snake import controlled_run, dis_width, dis_height, snake_block
+from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode
 import numpy as np
+from keras import layers, models
+import math
 
 # This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
-class Wrapper():
+def evolve(population, evolution_step):
 
-    def __init__(self):
+    # IMPLEMENT HERE: Genetic evolvement of the population
+
+    # Update each individual's evolution_step by using evolution_step that is passed to this function
+    for indiv in population:
+        indiv.evolution_step = evolution_step
+
+    return population
+
+class Individual():
+
+    def play(self):
+
+        # Start the game
+        score, age = controlled_run(self, self.model, self.ind_number, self.evolution_step)
+        print('done playing')
+
+        # Compute fitness
+        self.fitness = age*math.exp(score)
+
+    def __init__(self, ind_number, evolution_step):
+
+        # Give this individual a number
+        self.ind_number = ind_number
+
+        # Initialise this individual's evolution step with 1
+        self.evolution_step = evolution_step
 
         # Print game's width, height and snake's width
         print(dis_width, dis_height, snake_block)
 
-        # Start the game
-        controlled_run(self)
+        # Create a neural network that will learn to play snake
+        self.model = models.Sequential()
+        self.model.add(layers.Dense(64, activation = 'relu', input_dim = 53))
+        self.model.add(layers.Dense(4, activation = 'softmax'))
 
-    def control(self, game_state):
+        # Start the game
+        #score, age = controlled_run(self, self.model)
+        #print('done')
+
+        # Compute fitness
+        #self.fitness = age*math.exp(score)
+
+        # Play a game
+        self.play()
+
+    def control(self, game_state, model):
 
         # No input implemented yet. This function will receive information from a running snake game about the current state of the game.
 
@@ -74,21 +113,99 @@ class Wrapper():
                 # If so, write 1 in the respective field of vision cell
                 if food:
                     fov[i,j] = 1
+        print('Vision matrix:')
         print(fov)
 
-        # Define some valid inputs (this will not be relevant anymore once the Neural Network is implemented)
-        valid_inputs = ['w','a','s','d']
+        # Rename head position
+        x1 = s_head[0]
+        y1 = s_head[1]
+        #foodx = fx
+        #foody = fy
 
-        # Initialise a variable that says if a valid input was received
-        no_valid_input = True
+        foodx = 790
+        foody = 590
 
-        # Until a valid input was received, ask for one
-        while no_valid_input:
-            game_action = str(input())
-            if game_action in valid_inputs:
-                no_valid_input = False
+        #distances to food
+        distance_food_y = foody - y1
+        distance_food_x = foodx - x1
+
+        # Create the NN's input
+
+        #SCALE INPUTS to [0,1]
+        distance_food_y_scaled = (distance_food_y + (dis_height - snake_block))/(2*(dis_height - snake_block))
+        distance_food_x_scaled = (distance_food_x + (dis_width - snake_block))/(2*(dis_width - snake_block))
+        snake_head_x_scaled = x1 / (dis_width - snake_block)
+        snake_head_y_scaled = y1 / (dis_height - snake_block)
+
+        input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
+                    snake_head_x_scaled, snake_head_y_scaled]#snake head
+
+        #Transorm input intpo np.array
+        input_nn = np.array(input_nn)
+        #Fixing the shape so it can be used for the NN
+        input_nn.shape = (1,4)
+        #Concatenating the vision matrix to the input array                
+        fov.shape = (1,49)
+        input_nn = np.concatenate((input_nn, fov), axis = 1)
+
+        #Producing output of the model, the output are probabilities
+        #for each move, using np.argmax to get the index of the 
+        #highest probability
+        output = np.argmax(model.predict(input_nn))
+ 
+        #print input and output through the game to check
+        print(f'Input without vision matrix: {input_nn[:,:4]}')
+        # print(f'Vision matrix : \n {fov}')
+        print(f'Output : {output}')
+
+        if not automatic_mode:
+            # Define some valid inputs (this will not be relevant anymore once the Neural Network is implemented)
+            valid_inputs = ['w','a','s','d']
+
+            # Initialise a variable that scays if a valid input was received
+            no_valid_input = True
+
+            # Until a valid input was received, ask for one
+            while no_valid_input:
+                game_action = str(input())
+                if game_action in valid_inputs:
+                    no_valid_input = False
+
+        if automatic_mode:
+            game_action = output
 
         return game_action
 
 if __name__ == '__main__':
-    w = Wrapper()
+
+    # Initialise an evolution step counter
+    evolution_step = 1
+
+    # Initialise a boolean that says that evolution should go on
+    keep_evolving = True
+
+    # Initialise an empty list for our population and define how large it should be
+    population = []
+    pop_size = 3
+
+    for i in range(pop_size):
+        individual = Individual(i+1, evolution_step)
+        population.append(individual)
+        print("Individual", i+1, "is done playing its first game.")
+    
+    # While we want to keep evolving, 
+    while keep_evolving:
+
+        # Increment evolution_step
+        evolution_step += 1
+
+        # Evolve our population
+        population = evolve(population, evolution_step)
+
+        # Let evolved population play
+        for i in population:
+            i.play()
+
+        # REMOVE THIS LATER
+        if evolution_step >= 3:
+            keep_evolving = False
