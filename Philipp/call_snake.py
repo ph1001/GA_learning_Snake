@@ -280,8 +280,8 @@ if __name__ == '__main__':
         for i in population:
             i.play()
 
-        # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached
-        # This is defined after how many evolutions steps the program terminates.
+        # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached.
+        # For now this defines after how many evolutions steps the program terminates.
         if evolution_step >= 3:
             keep_evolving = False
 
