@@ -25,7 +25,7 @@ def message(msg, color, dis_width, dis_height, font_style, dis):
     
 #MAIN GAME FUNCTION
 
-def gameLoop(model, speed = 15, sight = 3):
+def gameLoop(model, speed = 15, sight = 3, verbose = False):
     
     #SETTINGS FOR DISPLAY
     
@@ -75,42 +75,18 @@ def gameLoop(model, speed = 15, sight = 3):
     age = 0
     
     while not game_over:
-        
-        # end of game; not automatic; will need to remove for final version
-        while game_close == True:
-            dis.fill(blue)
-            message("You Lost! Press C-Play Again or Q-Quit", red, dis_width, dis_height, font_style, dis)
-            Your_score(Length_of_snake - 1, yellow, score_font, dis)
-            pygame.display.update()
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        game_over = True
-                        game_close = False
-                    if event.key == pygame.K_c:
-                        gameLoop(model, snake_speed, sight)
-        
                         
         #Preparing input for the NN
- 
-        #distances to walls
-        distance_hwall_u = dis_height -y1
-        distance_hwall_d = y1
-        distance_vwall_u = dis_width - x1
-        distance_vwall_d = x1
+
         #distances to food
         distance_food_y = foody - y1
         distance_food_x = foodx - x1
         
         #SCALE INPUTS to [0,1]
-        distance_hwall_u = distance_hwall_u/dis_height
-        distance_hwall_d = distance_hwall_d/dis_height
-        distance_vwall_u = distance_vwall_u/dis_width
-        distance_vwall_d = distance_vwall_d/dis_width
-        distance_food_y = (distance_food_y + dis_height)/(2*dis_height)
-        distance_food_x = (distance_food_x + dis_width)/(2*dis_width)
-        snake_head_x_scaled = x1/dis_width
-        snake_head_y_scaled = y1/dis_height
+        distance_food_y_scaled = (distance_food_y + (dis_height - snake_block))/(2*(dis_height - snake_block))
+        distance_food_x_scaled = (distance_food_x + (dis_width - snake_block))/(2*(dis_width - snake_block))
+        snake_head_x_scaled = x1 / (dis_width - snake_block)
+        snake_head_y_scaled = y1 / (dis_height - snake_block)
         
         #VISION MATRIX
  
@@ -164,15 +140,11 @@ def gameLoop(model, speed = 15, sight = 3):
                      fov[i,j] = 1
                      #print(fov)
  
-        input_nn = [distance_hwall_u, distance_hwall_d, distance_vwall_u, 
-                    distance_vwall_d, #distances to walls
-                    distance_food_y, distance_food_x, #distances to food
-                    snake_head_x_scaled, snake_head_y_scaled]#snake head
- 
         #Transorm input intpo np.array
-        input_nn = np.array(input_nn)
+        input_nn = np.array( [distance_food_y_scaled, distance_food_x_scaled, #distances to food
+                              snake_head_x_scaled, snake_head_y_scaled])#snake head
         #Fixing the shape so it can be used for the NN
-        input_nn.shape = (1,8)
+        input_nn.shape = (1,4)
         #Concatenating the vision matrix to the input array                
         fov.shape = (1,49)
         input_nn = np.concatenate((input_nn, fov), axis = 1)
@@ -183,18 +155,20 @@ def gameLoop(model, speed = 15, sight = 3):
         output = np.argmax(model.predict(input_nn))
  
         #print input and output through the game to check
-        print(f'Input : {input_nn[:,:8]}')
-        print(f'Vision matrix : \n {fov}')
-        print(f'Output : {output}')
+        
  
          #Increasing age and moves variables
         age += 1
         moves += 1
          #After 50 moves without getting a fruit or dying the snake is 'stuck' therefore game is over
         if moves == 300:
-            game_close = True
+            game_over = True
         
-        print(f'Moves : {moves}, age : {age}')
+        if verbose:
+            print(f'Input : {input_nn[:,:8]}')
+            print(f'Vision matrix : \n {fov}')
+            print(f'Output : {output}')
+            print(f'Moves : {moves}, age : {age}')
                         
         #COMMAND LOOP
         for event in pygame.event.get():
@@ -228,8 +202,7 @@ def gameLoop(model, speed = 15, sight = 3):
         
         #CALCULATIONS OF OUTCOMES OF THE MOVE
         if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
-            game_close = True
-            #game_over = True NEED TO CHANGE FOR FINAL VERSION
+            game_over = True #NEED TO CHANGE FOR FINAL VERSION
         x1 += x1_change
         y1 += y1_change
         dis.fill(blue)
@@ -243,8 +216,7 @@ def gameLoop(model, speed = 15, sight = 3):
     
         for x in snake_List[:-1]:
             if x == snake_Head:
-                game_close = True
-                #game_over = True NEED TO CHANGE FOR FINAL VERSION
+                game_over = True #NEED TO CHANGE FOR FINAL VERSION
                 
         our_snake(dis, black, snake_block, snake_List)
         Your_score(Length_of_snake - 1, yellow, score_font, dis)

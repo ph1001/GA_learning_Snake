@@ -10,7 +10,7 @@ from keras import layers, models
 #import numpy as np
 
 model = models.Sequential()
-model.add(layers.Dense(64, activation = 'relu', input_dim = 57))
+model.add(layers.Dense(64, activation = 'relu', input_dim = 53))
 model.add(layers.Dense(4, activation = 'softmax'))
 
-fitness, moves = gameLoop(model, speed = 60)
+fitness, moves = gameLoop(model, speed = 60, verbose = False)
