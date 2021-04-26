@@ -31,16 +31,13 @@ blue = (50, 153, 213)
 # Define if we want the NNs to be in control (True) or the user via w,a,s, and d (False)
 automatic_mode = True
 
-# Choose how many games should be played per individual and evolution step (the score will be the mean of the scores achieved in these games)
-games_to_play = 2
-
 # Choose how many moves an individual is allowed to make until it is considered to be stuck
 moves_till_stuck = 100
 
 # Define a function that executes games_to_play games for a given individual 
 # and that returns a fitness computed as the average of the fitnesses resulting from these games.
 # games_to_play is defined above.
-def controlled_run(individual, ind_number, evolution_step):
+def controlled_run(individual, ind_number, evolution_step, games_to_play, verbose):
 
     # Initialize a games counter as a global variable
     global games_counter
@@ -95,7 +92,7 @@ def controlled_run(individual, ind_number, evolution_step):
     
     # Define a function that executes the Snake game. It calls itself recursively if games_to_play is greater than 1
     # It returns a list of the fitnesses that result from these games (if games_to_play >1) // this game (if games_to_play = 1)
-    def gameLoop(fitness_list):
+    def gameLoop(fitness_list, verbose):
         
         # Increment the games counter
         global games_counter
@@ -297,15 +294,18 @@ def controlled_run(individual, ind_number, evolution_step):
 
     # Call gameLoop, passing the empty list of fitnesses to it and receiving the list of fitnesses 
     # from it that results from the games_to_play games for this individual in this evolution step
-    fitness_list = gameLoop(fitness_list)
+    fitness_list = gameLoop(fitness_list, verbose)
 
     # Print the list of fitnesses of this individual in this evolution step
-    print()
-    print('Fitnesses of this/these', games_to_play, 'game(s):', fitness_list)
+    
+    if verbose:
+        print()
+        print('Fitnesses of this/these', games_to_play, 'game(s):', fitness_list)
 
     # Calculate the final fitness of this individual in this evolution step as the mean of the fitnesses contained in the list of fitnesses
     fitness = sum(fitness_list) / games_to_play
-    print('Resulting (mean) fitness', fitness)
+    if verbose:
+        print('Resulting (mean) fitness', fitness)
 
     # Return the resulting mean fitness for the games_to_play games played by this individual in the evolution step
     return fitness
