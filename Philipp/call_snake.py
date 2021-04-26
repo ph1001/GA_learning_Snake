@@ -5,27 +5,34 @@ import math
 
 # This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
-def evolve(population):
+def evolve(population, evolution_step):
 
-    # Here: implement genetic evolvement of the population
+    # IMPLEMENT HERE: Genetic evolvement of the population
+
+    # Update each individual's evolution_step by using evolution_step that is passed to this function
+    for indiv in population:
+        indiv.evolution_step = evolution_step
 
     return population
 
 class Individual():
 
-    def play(self, model):
+    def play(self):
 
         # Start the game
-        score, age = controlled_run(self, self.model, self.ind_number)
+        score, age = controlled_run(self, self.model, self.ind_number, self.evolution_step)
         print('done playing')
 
         # Compute fitness
         self.fitness = age*math.exp(score)
 
-    def __init__(self, ind_number):
+    def __init__(self, ind_number, evolution_step):
 
         # Give this individual a number
         self.ind_number = ind_number
+
+        # Initialise this individual's evolution step with 1
+        self.evolution_step = evolution_step
 
         # Print game's width, height and snake's width
         print(dis_width, dis_height, snake_block)
@@ -43,7 +50,7 @@ class Individual():
         #self.fitness = age*math.exp(score)
 
         # Play a game
-        self.play(self.model)
+        self.play()
 
     def control(self, game_state, model):
 
@@ -182,7 +189,7 @@ if __name__ == '__main__':
     pop_size = 3
 
     for i in range(pop_size):
-        individual = Individual(i+1)
+        individual = Individual(i+1, evolution_step)
         population.append(individual)
         print("Individual", i+1, "is done playing its first game.")
     
@@ -193,11 +200,11 @@ if __name__ == '__main__':
         evolution_step += 1
 
         # Evolve our population
-        population = evolve(population)
+        population = evolve(population, evolution_step)
 
         # Let evolved population play
         for i in population:
-            i.play(i.model)
+            i.play()
 
         # REMOVE THIS LATER
         if evolution_step >= 3:

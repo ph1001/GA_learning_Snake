@@ -15,7 +15,7 @@ blue = (50, 153, 213)
 automatic_mode = True
 games_to_play = 1
 
-def controlled_run(wrapper, model, ind_number):
+def controlled_run(wrapper, model, ind_number, evolution_step):
 
     # Initialize a games counter
     global games_counter
@@ -39,7 +39,7 @@ def controlled_run(wrapper, model, ind_number):
     
     
     def Your_score(score):
-        value = score_font.render("Your Score: " + str(score), True, yellow)
+        value = score_font.render("Score: " + str(score), True, yellow)
         dis.blit(value, [0, 0])
 
     def show_games_counter(games_counter):
@@ -48,12 +48,12 @@ def controlled_run(wrapper, model, ind_number):
 
     def show_which_individual(ind_number):
         value = score_font.render("Individual " + str(ind_number), True, yellow)
-        dis.blit(value, [0, 100])
+        dis.blit(value, [0, 200])
 
     # TO BE IMPLEMENTED
-    #def show_evolution_step(ind_number):
-    #    value = score_font.render("Evolution step " + str(evolution_step), True, yellow)
-    #    dis.blit(value, [0, 200])
+    def show_evolution_step(ind_number):
+        value = score_font.render("Evolution step " + str(evolution_step), True, yellow)
+        dis.blit(value, [0, 100])
       
     def our_snake(snake_block, snake_list):
         for x in snake_list:
@@ -221,7 +221,7 @@ def controlled_run(wrapper, model, ind_number):
             Your_score(Length_of_snake - 1)
             #show_games_counter(games_counter)
             show_which_individual(ind_number)
-            #show_evolution_step(evolution_step)
+            show_evolution_step(evolution_step)
     
             pygame.display.update()
     
