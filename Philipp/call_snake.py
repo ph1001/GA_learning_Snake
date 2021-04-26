@@ -1,9 +1,10 @@
-from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode
+# This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
+
+# Import libraries and components from snake
+from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode, detailed_console_outputs
 import numpy as np
 from keras import layers, models
 import math
-
-# This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
 def evolve(population, evolution_step):
 
@@ -20,11 +21,11 @@ class Individual():
     def play(self):
 
         # Start the game
-        score, age = controlled_run(self, self.model, self.ind_number, self.evolution_step)
-        print('done playing')
+        fitness = controlled_run(self, self.ind_number, self.evolution_step)
+        print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
 
-        # Compute fitness
-        self.fitness = age*math.exp(score)
+        # Update this individual's fitness
+        self.fitness = fitness
 
     def __init__(self, ind_number, evolution_step):
 
@@ -35,39 +36,35 @@ class Individual():
         self.evolution_step = evolution_step
 
         # Print game's width, height and snake's width
-        print(dis_width, dis_height, snake_block)
+        if detailed_console_outputs:
+            print(dis_width, dis_height, snake_block)
 
         # Create a neural network that will learn to play snake
         self.model = models.Sequential()
         self.model.add(layers.Dense(64, activation = 'relu', input_dim = 53))
         self.model.add(layers.Dense(4, activation = 'softmax'))
 
-        # Start the game
-        #score, age = controlled_run(self, self.model)
-        #print('done')
-
-        # Compute fitness
-        #self.fitness = age*math.exp(score)
-
         # Play a game
         self.play()
 
-    def control(self, game_state, model):
+    def control(self, game_state):
 
-        # No input implemented yet. This function will receive information from a running snake game about the current state of the game.
-
-        print("controll() was called.")
+        if detailed_console_outputs:
+            print("control() was called.")
 
         # In the very first iteration, simply pass "up"
         if game_state['snake_List'] == []:
-            print('"Up" was passed automatically.')
+
+            if detailed_console_outputs:
+                print('"Up" was passed automatically.')
             return 'w'
 
         # Process the information received about the current state of the game
 
-        print('snake_List:', game_state['snake_List'])
-        print('snake_Head:', game_state['snake_Head'])
-        print('food position:', game_state['foodx'], game_state['foody'])
+        if detailed_console_outputs:
+            print('snake_List:', game_state['snake_List'])
+            print('snake_Head:', game_state['snake_Head'])
+            print('food position:', game_state['foodx'], game_state['foody'])
            
         # Define a sight distance (number of squares counted from the edges of the snake's head; field of vision is a square as well)
         sight_dist = 3
@@ -113,8 +110,6 @@ class Individual():
                 # If so, write 1 in the respective field of vision cell
                 if food:
                     fov[i,j] = 1
-        print('Vision matrix:')
-        print(fov)
 
         # Rename head position
         x1 = s_head[0]
@@ -151,12 +146,14 @@ class Individual():
         #Producing output of the model, the output are probabilities
         #for each move, using np.argmax to get the index of the 
         #highest probability
-        output = np.argmax(model.predict(input_nn))
+        output = np.argmax(self.model.predict(input_nn))
  
         #print input and output through the game to check
-        print(f'Input without vision matrix: {input_nn[:,:4]}')
-        # print(f'Vision matrix : \n {fov}')
-        print(f'Output : {output}')
+        if detailed_console_outputs:
+            print(f'Input without vision matrix: {input_nn[:,:4]}')
+            print('Vision matrix:')
+            print(fov)
+            print(f'Output : {output}')
 
         if not automatic_mode:
             # Define some valid inputs (this will not be relevant anymore once the Neural Network is implemented)
@@ -186,12 +183,11 @@ if __name__ == '__main__':
 
     # Initialise an empty list for our population and define how large it should be
     population = []
-    pop_size = 3
+    pop_size = 2
 
     for i in range(pop_size):
         individual = Individual(i+1, evolution_step)
         population.append(individual)
-        print("Individual", i+1, "is done playing its first game.")
     
     # While we want to keep evolving, 
     while keep_evolving:
@@ -206,6 +202,9 @@ if __name__ == '__main__':
         for i in population:
             i.play()
 
-        # REMOVE THIS LATER
-        if evolution_step >= 3:
+        # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached
+        if evolution_step >= 2:
             keep_evolving = False
+
+    print()
+    print('All done.')
