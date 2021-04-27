@@ -27,6 +27,7 @@ from keras import layers, models
 import random
 from tqdm import tqdm
 from operator import  attrgetter
+import math
 
 
 ##CHANGES BY DAVIDE: -added more arguments to the Individual class so everything can be controlled when creating individuals
@@ -42,12 +43,18 @@ class Individual():
         # Start the game by calling the function controlled_run from snake.py and receive the fitness resulting 
         # from the games_to_play games played by this individual in this evolution step
         # MOVED games_to_play here, defined together with the individual
-        fitness = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose)
+        
+        #the controlled_run function return the score and the age of the Individual
+        score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose)
+        
+        self.score = score
+        self.age = age
+        
         if self.verbose:
             print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
 
-        # Update this individual's fitness
-        self.fitness = fitness
+        # INDIVIDUAL FITNESS FUNCTION
+        self.fitness = age*math.exp(score)
 
     # init function of class Individual
     def __init__(self, 

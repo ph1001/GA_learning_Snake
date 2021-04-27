@@ -4,8 +4,6 @@
 import math
 import random
 import pygame
-import time
-import random
 
 # Decide wether or not we want detailed console outputs (for debugging)
 detailed_console_outputs = False
@@ -92,7 +90,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
     
     # Define a function that executes the Snake game. It calls itself recursively if games_to_play is greater than 1
     # It returns a list of the fitnesses that result from these games (if games_to_play >1) // this game (if games_to_play = 1)
-    def gameLoop(fitness_list, verbose):
+    def gameLoop(score_list, age_list, verbose):
         
         # Increment the games counter
         global games_counter
@@ -150,11 +148,11 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
                                 game_over = True
                                 game_close = False
                             if event.key == pygame.K_c:
-                                fitness_list = gameLoop(fitness_list)
+                                score_list, age_list = gameLoop(score_list, age_list)
                 # By comparing the current value of games_counter with the value of games_to_play in automatic mode
                 if automatic_mode:
                     if games_counter < games_to_play:
-                        fitness_list = gameLoop(fitness_list)
+                        score_list, age_list = gameLoop(score_list, age_list, verbose)
                     else:
                         game_over = True
                         game_close = False
@@ -283,29 +281,30 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
         score = Length_of_snake - 1
 
         # Compute fitness resulting from this game and store it in the list of fitnesses
-        fitness = age*math.exp(score)
-        fitness_list.append(fitness)
+        score_list.append(score)
+        age_list.append(age)
 
         # Return the current list of fitnesses
-        return fitness_list
+        return score_list, age_list
     
     # Initialise a list for storing the fitnesses resulting from the games_to_play games for this individual in this evolution step
-    fitness_list = []
+    score_list, age_list = [], []
 
     # Call gameLoop, passing the empty list of fitnesses to it and receiving the list of fitnesses 
     # from it that results from the games_to_play games for this individual in this evolution step
-    fitness_list = gameLoop(fitness_list, verbose)
+    score_list, age_list = gameLoop(score_list, age_list, verbose)
 
     # Print the list of fitnesses of this individual in this evolution step
     
     if verbose:
         print()
-        print('Fitnesses of this/these', games_to_play, 'game(s):', fitness_list)
+        print('Score and ages of this/these', games_to_play, 'game(s):', score_list, age_list)
 
     # Calculate the final fitness of this individual in this evolution step as the mean of the fitnesses contained in the list of fitnesses
-    fitness = sum(fitness_list) / games_to_play
+    score = sum(score_list) / games_to_play
+    age = sum(age_list) / games_to_play
     if verbose:
-        print('Resulting (mean) fitness', fitness)
+        print('Resulting (mean) fitness', score, age)
 
     # Return the resulting mean fitness for the games_to_play games played by this individual in the evolution step
-    return fitness
+    return score, age
