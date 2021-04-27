@@ -304,7 +304,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
     score = sum(score_list) / games_to_play
     age = sum(age_list) / games_to_play
     if verbose:
-        print('Resulting (mean) fitness', score, age)
+        print('Resulting (mean) score and age' , score, age)
 
     # Return the resulting mean fitness for the games_to_play games played by this individual in the evolution step
     return score, age
