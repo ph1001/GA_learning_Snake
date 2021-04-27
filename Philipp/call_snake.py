@@ -238,15 +238,16 @@ class Population:
                  **kwargs):
         self.individuals = []
         self.size = size
+        self.evolution_step = evolution_step
 
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
         # of class Individual, which then will result in this individual playing snake.
         for i in tqdm(range(size)):
-            individual = Individual(i+1, evolution_step)
+            individual = Individual(i+1, self.evolution_step)
             self.individuals.append(individual)
 
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
-    def evolve(population, evolution_step):
+    def evolve(self):
 
         # IMPLEMENT HERE: Genetic evolution of the population
 
@@ -259,10 +260,10 @@ class Population:
 
 
         # Update each individual's evolution_step by using evolution_step that is passed to this function
-        for indiv in population:
-            indiv.evolution_step = evolution_step
+        for indiv in self.individuals:
+            indiv.evolution_step = self.evolution_step
 
-        return population
+        return self.individuals
 
     # Dave's evolve method. Will keep it here for now for inspiration
     if False:
