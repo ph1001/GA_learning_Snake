@@ -31,7 +31,7 @@ def phen_entropy(pop):
             #Calculating the fitnesses of the population
             fitnesses = [i.fitness for i in pop.individuals]
             #calculating the entropy over the population
-            return sum([ fitnesses.count(fitness) / len(fitnesses) * math.log(fitnesses.count(fitness) / len(fitnesses)) for fitness in set(fitnesses)])
+            return sum([ fitnesses.count(fitness) / len(fitnesses) * math.log(fitnesses.count(fitness) / len(fitnesses),  2) for fitness in fitnesses])
 
 def gen_entropy(pop):
             #selecting a random individual to be the origin
@@ -39,7 +39,7 @@ def gen_entropy(pop):
             #calculating the distances of each point to the distance
             distances = [ sum([ norm((ind[i], origin[i])) for i in range(len(ind)) ]) / len(ind) for ind in pop.individuals]
             #calculating the variance over the population
-            return sum([ distances.count(distance) / len(distances) * math.log(distances.count(distance) / len(distances)) for distance in set(distances)])
+            return sum([ distances.count(distance) / len(distances) * math.log(distances.count(distance) / len(distances), 2) for distance in distances])
 
         
 
