@@ -28,6 +28,7 @@ import random
 from tqdm import tqdm
 from operator import  attrgetter
 import math
+from copy import deepcopy
 
 
 ##CHANGES BY DAVIDE: -added more arguments to the Individual class so everything can be controlled when creating individuals
@@ -247,7 +248,7 @@ class Population:
             self.individuals.append(individual)
 
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
-    def evolve(self):
+    def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
 
         # IMPLEMENT HERE: Genetic evolution of the population
 
@@ -266,9 +267,14 @@ class Population:
         return self.individuals
 
     # Dave's evolve method. Will keep it here for now for inspiration
-    if False:
-        def evolve2(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
+        if False:
             for gen in range(gens):
+                
+                #Elitism
+                if elitism == True:
+                    #saving a deepcopy of the best individual of the population
+                    elite = deepcopy(max(self.individuals, key = attrgetter('fitness')))
+                    
                 new_pop = []
                 while len(new_pop) < self.size:
                     parent1, parent2 = select(self), select(self)
@@ -282,14 +288,19 @@ class Population:
                         offspring1 = mutate(offspring1)
                     if random() < mu_p:
                         offspring2 = mutate(offspring2)
-
+    
                     new_pop.append(Individual(representation=offspring1))
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(representation=offspring2))
+                
                 if elitism == True:
-                    raise NotImplementedError
+                    #finding worst Individual of the new population
+                    least_fit = min(new_pop, key = attrgetter('fitness'))
+                    #substituting the worst individual of the new population with the best one from the previous one
+                    new_pop[new_pop.index(least_fit)] = elite
 
-                self.individuals = new_pop
+                
+                
                 print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
 
     def __len__(self):
