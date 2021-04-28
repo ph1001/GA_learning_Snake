@@ -43,7 +43,8 @@ class Individual():
                 verbose = False,
                 input_dim = 53,
                 sight_dist = 3,
-                games_to_play = 1):
+                games_to_play = 1,
+                fitness_function = lambda x,y: x*math.exp(y)):
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -65,6 +66,8 @@ class Individual():
         self.sight_dist = sight_dist
         self.games_to_play = games_to_play
         self.verbose = verbose
+        self.fitness_sharing = fitness_sharing
+        self.fitness_function = fitness_function
         # Play a game
         self.play()
         
@@ -97,7 +100,8 @@ class Individual():
             print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
 
         # INDIVIDUAL FITNESS FUNCTION
-        self.fitness = age*math.exp(score)
+        self.fitness = self.fitness_function(age, score)
+            
         
     # Define a function that communicates with snake.py. It is called from snake.py from inside the function gameLoop
     def control(self, game_state):
@@ -238,6 +242,7 @@ class Population:
                  verbose = False,
                  evolution_step = 1,
                  record_diversity = False,
+                 fitness_sharing = False,
                  **kwargs):
         self.individuals = []
         self.size = size
@@ -263,7 +268,10 @@ class Population:
             self.gen_variance_dict = {str(self.evolution_step) : gen_variance(self)}
             self.phen_entropy_dict = {str(self.evolution_step) : phen_entropy(self)}
             self.gen_entropy_dict = {str(self.evolution_step) : gen_entropy(self)}
-            
+        
+        #FITNESS SHARING
+        if self.fitness_sharing:
+            raise NotImplementedError
             
 
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
@@ -349,38 +357,38 @@ class Population:
     def __repr__(self):
         return f"Population(size={len(self.individuals)})"
 
-if True:
-    # This is where the execution of this script starts.
-    if __name__ == '__main__':
+# if True:
+#     # This is where the execution of this script starts.
+#     if __name__ == '__main__':
 
-        # Initialise an evolution step counter
-        evolution_step = 1
+#         # Initialise an evolution step counter
+#         evolution_step = 1
 
-        # Initialise a boolean that says that evolution should go on
-        keep_evolving = True
+#         # Initialise a boolean that says that evolution should go on
+#         keep_evolving = True
 
-        # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
-        pop_size = 2
-        population = Population(pop_size, verbose=False)
+#         # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
+#         pop_size = 2
+#         population = Population(pop_size, verbose=False)
         
-        # While we want to keep evolving... 
-        while keep_evolving:
+#         # While we want to keep evolving... 
+#         while keep_evolving:
 
-            # Increment evolution_step
-            evolution_step += 1
+#             # Increment evolution_step
+#             evolution_step += 1
 
-            # Evolve our population
-            population.evolve()
+#             # Evolve our population
+#             population.evolve()
 
-            # Let evolved population play
-            for i in population:
-                i.play()
+#             # Let evolved population play
+#             for i in population:
+#                 i.play()
 
-            # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached.
-            # For now this defines after how many evolutions steps the program terminates.
-            if evolution_step >= 3:
-                keep_evolving = False
+#             # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached.
+#             # For now this defines after how many evolutions steps the program terminates.
+#             if evolution_step >= 3:
+#                 keep_evolving = False
 
-        # Print a final message to show that the program finished executing.
-        print()
-        print('All done.')
+#         # Print a final message to show that the program finished executing.
+#         print()
+#         print('All done.')
