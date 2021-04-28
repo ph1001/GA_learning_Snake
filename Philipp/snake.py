@@ -1,7 +1,6 @@
 # This game is an adapted version of the Snake game available here: https://github.com/shubham1710/snake-game-python
 
 # Import libraries
-import math
 import random
 import pygame
 
