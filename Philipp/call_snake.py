@@ -29,6 +29,7 @@ from tqdm import tqdm
 from operator import  attrgetter
 import math
 from copy import deepcopy
+from diversity_measures import phen_variance, gen_variance, phen_entropy, gen_entropy
 
 
 ##CHANGES BY DAVIDE: -added more arguments to the Individual class so everything can be controlled when creating individuals
@@ -94,6 +95,9 @@ class Individual():
 
     def __setitem__(self, position, value):
          self.weights[position] = value
+    
+    def __len__(self):
+        return len(self.weights)
     
     def __repr__(self):
         return f'Neural Network with {self.input_dim} input nodes, {self.model.layers[0].weights[1].shape[0]} hidden layer neurons and {self.model.layers[1].weights[1].shape[0]} output layer neurons'
@@ -236,16 +240,28 @@ class Population:
     def __init__(self, 
                  size,
                  evolution_step = 1,
+                 record_diversity = False,
                  **kwargs):
         self.individuals = []
         self.size = size
         self.evolution_step = evolution_step
-
+        self.record_diversity = record_diversity
+        
+        
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
         # of class Individual, which then will result in this individual playing snake.
         for i in tqdm(range(size)):
             individual = Individual(i+1, self.evolution_step)
             self.individuals.append(individual)
+        
+        if self.record_diversity:
+            
+            self.phen_variance_dict = {str(self.evolution_step) : phen_variance(self)}
+            self.gen_variance_dict = {str(self.evolution_step) : gen_variance(self)}
+            self.phen_entropy_dict = {str(self.evolution_step) : phen_entropy(self)}
+            self.gen_entropy_dict = {str(self.evolution_step) : gen_entropy(self)}
+            
+            
 
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
     def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
@@ -298,9 +314,22 @@ class Population:
                     least_fit = min(new_pop, key = attrgetter('fitness'))
                     #substituting the worst individual of the new population with the best one from the previous one
                     new_pop[new_pop.index(least_fit)] = elite
-
                 
+                self.individuals = new_pop
                 
+                #updating the evolution step                
+                self.evolution_step += 1
+                for indiv in self.individuals:
+                    indiv.evolution_step = self.evolution_step
+                
+                #recording the variance of the Population
+                if self.record_diversity:
+                    
+                    self.phen_variance_dict[str(self.evolution_step)] = phen_variance(self)
+                    self.gen_variance_dict[str(self.evolution_step)] = gen_variance(self) 
+                    self.phen_entropy_dict[str(self.evolution_step)] = phen_entropy(self)
+                    self.gen_entropy_dict[str(self.evolution_step)] = gen_entropy(self)
+                    
                 print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
 
     def __len__(self):
