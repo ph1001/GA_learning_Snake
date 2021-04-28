@@ -36,25 +36,6 @@ use_tqdm = True
 # Class Individual. Instances of this class play snake and make up a population.
 class Individual():
 
-    # Define a function that lets an individual play snake
-    def play(self):
-
-        # Start the game by calling the function controlled_run from snake.py and receive the fitness resulting 
-        # from the games_to_play games played by this individual in this evolution step
-        # MOVED games_to_play here, defined together with the individual
-        
-        #the controlled_run function return the score and the age of the Individual
-        score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose)
-        
-        self.score = score
-        self.age = age
-        
-        if self.verbose:
-            print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
-
-        # INDIVIDUAL FITNESS FUNCTION
-        self.fitness = age*math.exp(score)
-
     # init function of class Individual
     def __init__(self,
                 ind_number = random.randint(1,9),
@@ -99,7 +80,25 @@ class Individual():
     def __repr__(self):
         return f'Neural Network with {self.input_dim} input nodes, {self.model.layers[0].weights[1].shape[0]} hidden layer neurons and {self.model.layers[1].weights[1].shape[0]} output layer neurons'
          
+    # Define a function that lets an individual play snake
+    def play(self):
 
+        # Start the game by calling the function controlled_run from snake.py and receive the fitness resulting 
+        # from the games_to_play games played by this individual in this evolution step
+        # MOVED games_to_play here, defined together with the individual
+        
+        #the controlled_run function return the score and the age of the Individual
+        score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose)
+        
+        self.score = score
+        self.age = age
+        
+        if self.verbose:
+            print('Evolution step ' + str(self.evolution_step) + ':, Individual ' + str(self.ind_number) + ' is done playing.')
+
+        # INDIVIDUAL FITNESS FUNCTION
+        self.fitness = age*math.exp(score)
+        
     # Define a function that communicates with snake.py. It is called from snake.py from inside the function gameLoop
     def control(self, game_state):
 
