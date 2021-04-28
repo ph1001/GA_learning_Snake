@@ -29,7 +29,7 @@ from tqdm import tqdm
 from operator import  attrgetter
 import math
 from copy import deepcopy
-from diversity_measures import phen_variance, gen_variance, phen_entropy, gen_entropy
+from utils import phen_variance, gen_variance, phen_entropy, gen_entropy, fs
 
 use_tqdm = True
    
@@ -66,7 +66,6 @@ class Individual():
         self.sight_dist = sight_dist
         self.games_to_play = games_to_play
         self.verbose = verbose
-        self.fitness_sharing = fitness_sharing
         self.fitness_function = fitness_function
         # Play a game
         self.play()
@@ -241,14 +240,11 @@ class Population:
                  size,
                  verbose = False,
                  evolution_step = 1,
-                 record_diversity = False,
-                 fitness_sharing = False,
                  **kwargs):
         self.individuals = []
         self.size = size
         self.verbose = verbose
         self.evolution_step = evolution_step
-        self.record_diversity = record_diversity
         
         
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
@@ -269,11 +265,16 @@ class Population:
             self.phen_entropy_dict = {str(self.evolution_step) : phen_entropy(self)}
             self.gen_entropy_dict = {str(self.evolution_step) : gen_entropy(self)}
         
-        #FITNESS SHARING
-        if self.fitness_sharing:
-            raise NotImplementedError
-            
 
+            
+    def __len__(self):
+        return len(self.individuals)
+
+    def __getitem__(self, position):
+        return self.individuals[position]
+
+    def __repr__(self):
+        return f"Population(size={len(self.individuals)})"
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
     #def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
     def evolve(self):
@@ -300,32 +301,45 @@ class Population:
 
     # Dave's evolve method. Will keep it here for now for inspiration
         if False:
-            for gen in range(gens):
+            for gen in range(gens): #argument of evolve attribute
+                
+            
+                #recording the variance of the Population
+                if record_diversity: #argument of evolve attribute
+                    
+                    self.phen_variance_dict[str(self.evolution_step)] = phen_variance(self)
+                    self.gen_variance_dict[str(self.evolution_step)] = gen_variance(self) 
+                    self.phen_entropy_dict[str(self.evolution_step)] = phen_entropy(self)
+                    self.gen_entropy_dict[str(self.evolution_step)] = gen_entropy(self)
+                
+                #FITNESS SHARING
+                if fitness_sharing: #argument of evolve attribute
+                    fs(self)
                 
                 #Elitism
-                if elitism == True:
+                if elitism == True: #argument of evolve attribute
                     #saving a deepcopy of the best individual of the population
                     elite = deepcopy(max(self.individuals, key = attrgetter('fitness')))
                     
                 new_pop = []
                 while len(new_pop) < self.size:
-                    parent1, parent2 = select(self), select(self)
+                    parent1, parent2 = select(self), select(self) #argument of evolve attribute
                     # Crossover
-                    if random() < co_p:
-                        offspring1, offspring2 = crossover(parent1, parent2)
+                    if random() < co_p: #argument of evolve attribute
+                        offspring1, offspring2 = crossover(parent1, parent2) #argument of evolve attribute
                     else:
                         offspring1, offspring2 = parent1, parent2
                     # Mutation
-                    if random() < mu_p:
-                        offspring1 = mutate(offspring1)
-                    if random() < mu_p:
-                        offspring2 = mutate(offspring2)
+                    if random() < mu_p: #argument of evolve attribute
+                        offspring1 = mutate(offspring1) #argument of evolve attribute
+                    if random() < mu_p: #argument of evolve attribute
+                        offspring2 = mutate(offspring2) #argument of evolve attribute
     
                     new_pop.append(Individual(representation=offspring1))
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(representation=offspring2))
                 
-                if elitism == True:
+                if elitism == True: #argument of evolve attribute
                     #finding worst Individual of the new population
                     least_fit = min(new_pop, key = attrgetter('fitness'))
                     #substituting the worst individual of the new population with the best one from the previous one
@@ -338,24 +352,14 @@ class Population:
                 for indiv in self.individuals:
                     indiv.evolution_step = self.evolution_step
                 
-                #recording the variance of the Population
-                if self.record_diversity:
+
                     
-                    self.phen_variance_dict[str(self.evolution_step)] = phen_variance(self)
-                    self.gen_variance_dict[str(self.evolution_step)] = gen_variance(self) 
-                    self.phen_entropy_dict[str(self.evolution_step)] = phen_entropy(self)
-                    self.gen_entropy_dict[str(self.evolution_step)] = gen_entropy(self)
+                #FITNESS SHARING (explanation in utils)                
+
                     
                 print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
 
-    def __len__(self):
-        return len(self.individuals)
 
-    def __getitem__(self, position):
-        return self.individuals[position]
-
-    def __repr__(self):
-        return f"Population(size={len(self.individuals)})"
 
 # if True:
 #     # This is where the execution of this script starts.

@@ -7,8 +7,9 @@ Created on Wed Apr 28 14:40:35 2021
 #Functions that calculate the variance and the entropy, both phenotypic and genotypic
 
 from random import sample
-from numpy.linalg import norm
+from scipy.spatial.distance import euclidean
 import math
+import numpy as np
 
 def phen_variance(pop):
             #Calculating the avg fitness of the population
@@ -21,7 +22,7 @@ def gen_variance(pop):
             #selecting a random individual to be the origin
             origin = sample(pop.individuals, 1)[0]
             #calculating the distances of each point to the distance
-            distances = [ sum([ norm((ind[i], origin[i])) for i in range(len(ind)) ]) / len(ind) for ind in pop.individuals]
+            distances = [ sum([ euclidean(ind[i], origin[i]) for i in range(len(ind)) ]) / len(ind) for ind in pop.individuals]
             #calculating the average distance over the population
             avg_distance = sum(distances) / pop.size
             #calculating the variance over the population
@@ -37,11 +38,36 @@ def gen_entropy(pop):
             #selecting a random individual to be the origin
             origin = sample(pop.individuals, 1)[0]
             #calculating the distances of each point to the distance
-            distances = [ sum([ norm((ind[i], origin[i])) for i in range(len(ind)) ]) / len(ind) for ind in pop.individuals]
+            distances = [ sum([ euclidean(ind[i], origin[i]) for i in range(len(ind)) ]) / len(ind) for ind in pop.individuals]
             #calculating the variance over the population
             return sum([ distances.count(distance) / len(distances) * math.log(distances.count(distance) / len(distances), 2) for distance in distances])
 
-        
+def fs(pop):
+            #building the distance-half matrix
+            #starting by initializing the matrix with zeros
+            distance_matrix = np.zeros((len(pop), len(pop)))
+            #iterating over the individuals and calculating the euclidean distances
+            for i in range(pop.size):
+                for j in range(i, pop.size):
+                    distance_matrix[i,j] = sum([ euclidean(pop.individuals[i][index].flatten(), pop.individuals[j][index].flatten()) for index in range(4) ]) / 4
+            #normalizing distances in [0,1] and reverting them, so the result is big if the distance was small and viceversa
+            max_ = distance_matrix.max()
+            min_ = distance_matrix.min()
+            distance_matrix = 1 - (distance_matrix - min_)/(max_ - min_)
+            #defining a sharing coeffient for each element in the population
+            sharing_coeff = []
+            for i in range(pop.size):
+                sharing_coeff.append( sum(distance_matrix[i] + distance_matrix.T[i]) )
+            #updating the individuals fitness
+            for i, individual in enumerate(pop.individuals):
+                individual.fitness = individual.fitness / sharing_coeff[i]
+                
+                    
+            
+    
+    
+    
+            
 
 
 
