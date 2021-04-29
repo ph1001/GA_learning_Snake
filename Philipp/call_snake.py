@@ -27,7 +27,7 @@ from snake_selection import fps, tournament, ranking
 import numpy as np
 from keras import layers, models
 import random
-from random import sample
+from random import sample, random
 from tqdm import tqdm
 from operator import  attrgetter
 import math

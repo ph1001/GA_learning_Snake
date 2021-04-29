@@ -23,11 +23,13 @@ Created on Mon Apr 26 16:36:47 2021
 # Import libraries and components from snake
 from snake_hv import controlled_run, dis_width, dis_height, snake_block, automatic_mode, detailed_console_outputs
 from snake_crossover_hv import arithmetic_co
+from snake_mutation_hv import geometric_mutation, normal_distribution_mutation
+from snake_selection_hv import fps, ranking, tournament
 import numpy as np
 from keras import layers, models
 import random
-from random import sample
-#from tqdm import tqdm
+from random import sample, random
+from tqdm import tqdm
 from operator import  attrgetter
 import math
 from copy import deepcopy
@@ -275,12 +277,9 @@ class Population:
         return f"Population(size={len(self.individuals)})"
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
     #def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
-    def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
+    def evolve2(self):
 
         # IMPLEMENT HERE: Genetic evolution of the population
-        
-
-
 
 
 
@@ -321,19 +320,19 @@ class Population:
         return self.individuals
 
     # Dave's evolve method. Will keep it here for now for inspiration
-        if False:
-            # evolve(self,
-                    # gens, #Number of generations to be produced
-                    # select, #Selection function
-                    # crossover, #Crossover function
-                    # mutate, #Mutation function
-                    # constant_ms = None, #Geometric Mutation coefficient 
-                    # co_p, #crossover probability
-                    # mu_p, #mutation probability
-                    # elitism = False, #wheter to perform elitisim
-                    # record_diversity = False, #wheter to record diversity
-                    # fitness_sharing = False #wheter to perform fitness sharing
-                    # )
+    def evolve(self,
+                gens, #Number of generations to be produced
+                select, #Selection function
+                crossover, #Crossover function
+                mutate, #Mutation function
+                constant_ms, #Geometric Mutation coefficient 
+                co_p, #crossover probability
+                mu_p, #mutation probability
+                elitism, #wheter to perform elitisim
+                record_diversity, #wheter to record diversity
+                fitness_sharing #wheter to perform fitness sharing
+                ):
+                     
             for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
                 
             
@@ -396,7 +395,7 @@ class Population:
 
 
 
-if True:
+if False:
     # This is where the execution of this script starts.
     if __name__ == '__main__':
 

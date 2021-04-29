@@ -14,7 +14,7 @@ def fps(pop):
             return individual
 
 
-def tournament(pop, size=20):
+def tournament(pop, size=4):
     # Select individuals based on tournament size
     tournament = sample(pop.individuals, size)
     # Return the fittest inividuals from the sample
