@@ -47,7 +47,8 @@ class Individual():
                 sight_dist = 3,
                 games_to_play = 1,
                 fitness_function = lambda x,y: x*math.exp(y) ,
-                weights = None):
+                weights = None,
+                moves_till_stuck = 50):
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -72,6 +73,7 @@ class Individual():
         self.games_to_play = games_to_play
         self.verbose = verbose
         self.fitness_function = fitness_function
+        self.moves_till_stuck = moves_till_stuck
         # Play a game
         self.play()
         
@@ -95,7 +97,7 @@ class Individual():
         # MOVED games_to_play here, defined together with the individual
         
         #the controlled_run function return the score and the age of the Individual
-        score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose)
+        score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
         
         self.score = score
         self.age = age
