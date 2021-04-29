@@ -23,6 +23,7 @@ Created on Mon Apr 26 16:36:47 2021
 # Import libraries and components from snake
 from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode, detailed_console_outputs
 from snake_crossover import arithmetic_co
+from snake_selection import fps, tournament, ranking
 import numpy as np
 from keras import layers, models
 import random
