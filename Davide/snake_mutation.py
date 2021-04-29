@@ -33,7 +33,7 @@ def geometric_mutation(individual, constant_ms, evolution_step):
                 shift = uniform(-constant_ms, constant_ms)
                 matrix[i] += shift 
     
-    return individual
+    
 
 def normal_distribution_mutation(individual):
     """ Mutation for snake Individual calculating the shift with a standard normal distribution
@@ -58,4 +58,4 @@ def normal_distribution_mutation(individual):
                 shift = randn()
                 matrix[i] += shift 
     
-    return individual
+    
