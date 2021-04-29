@@ -46,7 +46,8 @@ class Individual():
                 input_dim = 53,
                 sight_dist = 3,
                 games_to_play = 1,
-                fitness_function = lambda x,y: x*math.exp(y)):
+                fitness_function = lambda x,y: x*math.exp(y) ,
+                weights = None):
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -62,6 +63,8 @@ class Individual():
         self.model = models.Sequential()
         self.model.add(layers.Dense(64, activation = 'relu', input_dim = input_dim))
         self.model.add(layers.Dense(4, activation = 'softmax'))
+        if weights != None:
+            model.set_weights(weights)
 
         self.weights = self.model.get_weights()
         self.input_dim = input_dim
@@ -252,7 +255,7 @@ class Population:
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
         # of class Individual, which then will result in this individual playing snake.
         if use_tqdm:
-            for i in tqdm(range(size)):
+            for i in tqdm(range(size), desc = 'Building Population'):
                 individual = Individual(i+1, self.evolution_step, self.verbose)
                 self.individuals.append(individual)
         else:
@@ -314,7 +317,19 @@ class Population:
 
     # Dave's evolve method. Will keep it here for now for inspiration
         if False:
-            for gen in range(gens): #argument of evolve attribute
+            # evolve(self,
+                    # gens, #Number of generations to be produced
+                    # select, #Selection function
+                    # crossover, #Crossover function
+                    # mutate, #Mutation function
+                    # constant_ms = None, #Geometric Mutation coefficient 
+                    # co_p, #crossover probability
+                    # mu_p, #mutation probability
+                    # elitism = False, #wheter to perform elitisim
+                    # record_diversity = False, #wheter to record diversity
+                    # fitness_sharing = False #wheter to perform fitness sharing
+                    # )
+            for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
                 
             
                 #recording the variance of the Population
@@ -336,21 +351,28 @@ class Population:
                     
                 new_pop = []
                 while len(new_pop) < self.size:
-                    parent1, parent2 = select(self), select(self) #argument of evolve attribute
+                    offspring1, offspring2 = select(self), select(self) #argument of evolve attribute
                     # Crossover
                     if random() < co_p: #argument of evolve attribute
-                        offspring1, offspring2 = crossover(parent1, parent2) #argument of evolve attribute
-                    else:
-                        offspring1, offspring2 = parent1, parent2
+                        crossover(offspring1, offspring2) #argument of evolve attribute
+                        
                     # Mutation
                     if random() < mu_p: #argument of evolve attribute
-                        offspring1 = mutate(offspring1) #argument of evolve attribute
+                        if constant_ms != None:
+                            #GEOMETRIC MUTATION
+                            mutate(offspring1, constant_ms) #argument of evolve attribute
+                        else:
+                            mutate(offspring1)
                     if random() < mu_p: #argument of evolve attribute
-                        offspring2 = mutate(offspring2) #argument of evolve attribute
+                        if constant_ms != None:
+                            #GEOMETRIC MUTATION
+                            mutate(offspring2, constant_ms) #argument of evolve attribute
+                        else:
+                            mutate(offspring2)
     
-                    new_pop.append(Individual(representation=offspring1))
+                    new_pop.append(Individual(weights = offspring1.weights))
                     if len(new_pop) < self.size:
-                        new_pop.append(Individual(representation=offspring2))
+                        new_pop.append(Individual(weights = offspring1.weights))
                 
                 if elitism == True: #argument of evolve attribute
                     #finding worst Individual of the new population
@@ -364,12 +386,7 @@ class Population:
                 self.evolution_step += 1
                 for indiv in self.individuals:
                     indiv.evolution_step = self.evolution_step
-                
-
-                    
-                #FITNESS SHARING (explanation in utils)                
-
-                    
+         
                 print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
 
 
