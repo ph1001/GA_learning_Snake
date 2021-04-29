@@ -63,7 +63,7 @@ class Individual():
                 verbose = False,
                 input_dim = 53,
                 sight_dist = 3,
-                games_to_play = 1):
+                games_to_play = 2):
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -278,14 +278,22 @@ class Population:
         # CODE #
         ########
 
-        from crossover import arithmetic_co
 
+        # ARITHMETIC CROSSOVER
+
+        # MOVE THIS TO TOP OF THE SCRIPT LATER - Import arithmetic_co
+        from snake_crossover import arithmetic_co
+
+        # FOR NOW LIKE THIS - Get two random indices from our population and get the corresponding individuals
         parents_indices = sample(range(len(self.individuals)), 2)
-        print(parents_indices)
+        if self.verbose:
+            print()
+            print('Indices (from 0 to ...) of parents used for crossover:', parents_indices)
 
-        #offspring1, offspring2 = arithmetic_co(parents[0], parents[1])
-
-
+        # Perform arithmetic crossover on those two parents
+        # This will change the weights of these individuals! This means that there is no need to catch what the function returns 
+        # because it writes the changes into our original individuals. The parents become the offspring.
+        arithmetic_co(self.individuals[parents_indices[0]], self.individuals[parents_indices[1]])
 
 
 
@@ -375,7 +383,7 @@ if True:
         keep_evolving = True
 
         # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
-        pop_size = 6
+        pop_size = 3
         population = Population(pop_size, verbose=True)
         
         # While we want to keep evolving... 
