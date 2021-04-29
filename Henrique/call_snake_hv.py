@@ -67,7 +67,7 @@ class Individual():
         self.model.add(layers.Dense(64, activation = 'relu', input_dim = input_dim))
         self.model.add(layers.Dense(4, activation = 'softmax'))
         if weights != None:
-            model.set_weights(weights)
+            self.model.set_weights(weights)
 
         self.weights = self.model.get_weights()
         self.input_dim = input_dim
