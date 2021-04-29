@@ -41,7 +41,7 @@ class Individual():
 
     # init function of class Individual
     def __init__(self,
-                ind_number = random.randint(1,9),
+                ind_number = randint(1,9),
                 evolution_step = 1,
                 verbose = False,
                 input_dim = 53,

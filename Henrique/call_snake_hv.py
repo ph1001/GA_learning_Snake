@@ -28,7 +28,7 @@ from snake_selection_hv import fps, ranking, tournament
 import numpy as np
 from keras import layers, models
 import random
-from random import sample, random
+from random import sample, random, randint
 from tqdm import tqdm
 from operator import  attrgetter
 import math
@@ -42,7 +42,7 @@ class Individual():
 
     # init function of class Individual
     def __init__(self,
-                ind_number = random.randint(1,9),
+                ind_number = randint(1,9),
                 evolution_step = 1,
                 verbose = False,
                 input_dim = 53,
