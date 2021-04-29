@@ -5,9 +5,11 @@ Created on Tue Apr 27 16:19:09 2021
 @author: utente
 """
 
-from random import randint, sample, uniform, randn
+from random import randint, sample, uniform
+from numpy.random import randn
 
-def geometric_mutation(individual, constant_ms, evolution_step):
+
+def geometric_mutation(individual, constant_ms):
     """Geometric mutation for snake Individual
 
     Args:
@@ -17,7 +19,7 @@ def geometric_mutation(individual, constant_ms, evolution_step):
         Indivdual: mutated Individual
     """
     #decrement of the constant_ms
-    constant_ms = constant_ms/evolution_step
+    constant_ms = constant_ms / individual.evolution_step
     
     #We iterate over the weights (matrix, array, matrix, array) 
     for i,matrix in enumerate(individual):
