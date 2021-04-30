@@ -21,20 +21,15 @@ Created on Mon Apr 26 16:36:47 2021
 # This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
 # Import libraries and components from snake
-from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode, detailed_console_outputs
-from snake_crossover import arithmetic_co
-from snake_selection import fps, tournament, ranking
+from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode
 import numpy as np
 from keras import layers, models
-from random import sample, random, randint
+from random import random, randint
 from tqdm import tqdm
 from operator import  attrgetter
 import math
-from copy import deepcopy
 from utils import phen_variance, gen_variance, phen_entropy, gen_entropy, fs
 
-use_tqdm = True
-   
 # Class Individual. Instances of this class play snake and make up a population.
 class Individual():
 
@@ -45,7 +40,7 @@ class Individual():
                 verbose = False,
                 input_dim = 53,
                 sight_dist = 3,
-                games_to_play = 2,
+                games_to_play = 1,
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
                 moves_till_stuck = 50):
@@ -57,7 +52,7 @@ class Individual():
         self.evolution_step = evolution_step
 
         # Print game's width, height and snake's width
-        if detailed_console_outputs:
+        if self.verbose:
             print(dis_width, dis_height, snake_block)
 
         # Create a neural network that will learn to play snake
@@ -113,21 +108,21 @@ class Individual():
     def control(self, game_state):
 
         # Some printing for debugging purposes
-        if detailed_console_outputs:
+        if self.verbose:
             print("control() was called.")
 
         # In the very first iteration, simply pass "up"
         if game_state['snake_List'] == []:
 
             # Some printing for debugging purposes
-            if detailed_console_outputs:
+            if self.verbose:
                 print('"Up" was passed automatically.')
             return 'w'
 
         # Process the information received about the current state of the game
 
         # Some printing for debugging purposes
-        if detailed_console_outputs:
+        if self.verbose:
             print('snake_List:', game_state['snake_List'])
             print('snake_Head:', game_state['snake_Head'])
             print('food position:', game_state['foodx'], game_state['foody'])
@@ -216,7 +211,7 @@ class Individual():
  
         # Some printing for debugging purposes
         # print input and output
-        if detailed_console_outputs:
+        if self.verbose:
             print(f'Input without vision matrix: {input_nn[:,:4]}')
             print('Vision matrix:')
             print(fov)
@@ -246,24 +241,23 @@ class Population:
     def __init__(self, 
                  size,
                  verbose = False,
-                 evolution_step = 1,
+                 evolution_step = 0,
+                 moves_till_stuck = 50,
                  **kwargs):
         self.individuals = []
         self.size = size
         self.verbose = verbose
         self.evolution_step = evolution_step
+        self.moves_till_stuck = moves_till_stuck
         
         
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
         # of class Individual, which then will result in this individual playing snake.
-        if use_tqdm:
-            for i in tqdm(range(size), desc = 'Building Population'):
-                individual = Individual(i+1, self.evolution_step, self.verbose)
-                self.individuals.append(individual)
-        else:
-            for i in range(size):
-                individual = Individual(i+1, self.evolution_step, self.verbose)
-                self.individuals.append(individual)
+        for i in tqdm(range(size)):
+            individual = Individual(i+1, evolution_step  = self.evolution_step,
+                                    verbose = self.verbose,
+                                    moves_till_stuck = self.moves_till_stuck)
+            self.individuals.append(individual)
             
     def __len__(self):
         return len(self.individuals)
@@ -273,67 +267,32 @@ class Population:
 
     def __repr__(self):
         return f"Population(size={len(self.individuals)})"
+    
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
-    #def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
-    def evolve(self):
-
-        # IMPLEMENT HERE: Genetic evolution of the population
-
-
-
-        ########
-        # CODE #
-        ########
-
-
-
-        # ARITHMETIC CROSSOVER
-
-        # CHANGE THIS ACCORDING TO HOW WE WANT TO DO THIS - For now: Get two random indices from our population and get the corresponding individuals
-        parents_indices = sample(range(len(self.individuals)), 2)
-
-        # Perform arithmetic crossover on those two parents.
-        # This will change the weights of these individuals! This means that there is no need to catch what the function returns
-        # because it writes the changes into our original individuals. The parents become the offspring.
-        arithmetic_co(self.individuals[parents_indices[0]], self.individuals[parents_indices[1]])
-
-
-
-        ########
-        # CODE #
-        ########
-
-
-
-        # Update the population's evolution step
-        self.evolution_step += 1
-        if self.verbose:
-            print()
-            print("Evolution step updated. New evolution step:", self.evolution_step)
-
-        # Update each individual's evolution_step
-        for indiv in self.individuals:
-            indiv.evolution_step = self.evolution_step
-
-        return self.individuals
-
-    # Dave's evolve method. Will keep it here for now for inspiration
-        if True:
-            # evolve(self,
-                    # gens, #Number of generations to be produced
-                    # select, #Selection function
-                    # crossover, #Crossover function
-                    # mutate, #Mutation function
-                    # constant_ms = None, #Geometric Mutation coefficient 
-                    # co_p, #crossover probability
-                    # mu_p, #mutation probability
-                    # elitism = False, #wheter to perform elitisim
-                    # record_diversity = False, #wheter to record diversity
-                    # fitness_sharing = False #wheter to perform fitness sharing
-                    # )
-            for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
-                
+    def evolve( self,
+                gens, #Number of generations to be produced
+                select, #Selection function
+                crossover, #Crossover function
+                mutate, #Mutation function
+                co_p, #crossover probability
+                mu_p, #mutation probability
+                tournament_size = None, #size of the sample for the tournament selction
+                constant_ms = None, #Geometric Mutation coefficient 
+                elitism = False, #wheter to perform elitisim
+                record_diversity = False, #wheter to record diversity
+                fitness_sharing = False): #wheter to perform fitness sharing
+    
+        if record_diversity:
+            self.phen_variance_dict = {}
+            self.gen_variance_dict = {}
+            self.phen_entropy_dict = {}
+            self.gen_entropy_dict = {}
             
+        for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
+                
+        
+                new_moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2))
+                
                 #recording the variance of the Population
                 if record_diversity: #argument of evolve attribute
                     
@@ -349,11 +308,13 @@ class Population:
                 #Elitism
                 if elitism == True: #argument of evolve attribute
                     #saving a deepcopy of the best individual of the population
-                    elite = deepcopy(max(self.individuals, key = attrgetter('fitness')))
-                    
+                    elite = max(self.individuals, key = attrgetter('fitness')).weights
                 new_pop = []
                 while len(new_pop) < self.size:
-                    offspring1, offspring2 = select(self), select(self) #argument of evolve attribute
+                    if tournament_size != None:
+                        offspring1, offspring2 = select(self, tournament_size), select(self, tournament_size)
+                    else:
+                        offspring1, offspring2 = select(self), select(self) #argument of evolve attribute
                     # Crossover
                     if random() < co_p: #argument of evolve attribute
                         crossover(offspring1, offspring2) #argument of evolve attribute
@@ -372,59 +333,35 @@ class Population:
                         else:
                             mutate(offspring2)
     
-                    new_pop.append(Individual(weights = offspring1.weights))
+                    new_pop.append(Individual(ind_number = len(new_pop),
+                                              weights = offspring1.weights,
+                                              moves_till_stuck = new_moves_till_stuck,
+                                              evolution_step = gen + 1))
                     if len(new_pop) < self.size:
-                        new_pop.append(Individual(weights = offspring1.weights))
+                        new_pop.append(Individual(ind_number = len(new_pop),
+                                                  weights = offspring1.weights,
+                                                  moves_till_stuck = new_moves_till_stuck,
+                                                  evolution_step = gen + 1))
                 
                 if elitism == True: #argument of evolve attribute
                     #finding worst Individual of the new population
                     least_fit = min(new_pop, key = attrgetter('fitness'))
                     #substituting the worst individual of the new population with the best one from the previous one
-                    new_pop[new_pop.index(least_fit)] = elite
+                    new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                   weights = elite,
+                                                                   moves_till_stuck = new_moves_till_stuck,
+                                                                   evolution_step = gen + 1)
+                    
                 
                 self.individuals = new_pop
+                
+                for ind in self.individuals:
+                    ind.fitness = ind.fitness / new_moves_till_stuck
                 
                 #updating the evolution step                
                 self.evolution_step += 1
                 for indiv in self.individuals:
                     indiv.evolution_step = self.evolution_step
          
-                print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
-
-
-
-if True:
-    # This is where the execution of this script starts.
-    if __name__ == '__main__':
-
-        # Initialise an evolution step counter
-        evolution_step = 1
-
-        # Initialise a boolean that says that evolution should go on
-        keep_evolving = True
-
-        # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
-        pop_size = 4
-        population = Population(pop_size, verbose=False)
-        
-        # While we want to keep evolving... 
-        while keep_evolving:
-
-            # Increment evolution_step
-            evolution_step += 1
-
-            # Evolve our population
-            population.evolve()
-
-            # Let evolved population play
-            for i in population:
-                i.play()
-
-            # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached.
-            # For now this defines after how many evolutions steps the program terminates.
-            if evolution_step >= 3:
-                keep_evolving = False
-
-        # Print a final message to show that the program finished executing.
-        print()
-        print('All done.')
+                print(f'Best Individual: {max(self, key=attrgetter("fitness")).fitness}')
+            

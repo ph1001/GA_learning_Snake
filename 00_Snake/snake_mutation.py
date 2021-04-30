@@ -19,7 +19,7 @@ def geometric_mutation(individual, constant_ms):
         Indivdual: mutated Individual
     """
     #decrement of the constant_ms
-    constant_ms = constant_ms / individual.evolution_step
+    constant_ms = constant_ms / (individual.evolution_step + 1)
     
     #We iterate over the weights (matrix, array, matrix, array) 
     for i,matrix in enumerate(individual):

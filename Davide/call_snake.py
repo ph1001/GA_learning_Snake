@@ -28,7 +28,6 @@ from random import random, randint
 from tqdm import tqdm
 from operator import  attrgetter
 import math
-from copy import deepcopy
 from utils import phen_variance, gen_variance, phen_entropy, gen_entropy, fs
 
 # Class Individual. Instances of this class play snake and make up a population.
@@ -366,5 +365,3 @@ class Population:
          
                 print(f'Best Individual: {max(self, key=attrgetter("fitness")).fitness}')
             
-        # if record_diversity:
-        #     return phen_variance_dict, gen_variance_dict, phen_entropy_dict, gen_entropy_dict

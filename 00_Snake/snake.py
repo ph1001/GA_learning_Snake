@@ -4,8 +4,6 @@
 import random
 import pygame
 
-# Decide wether or not we want detailed console outputs (for debugging)
-detailed_console_outputs = False
 
 # Define display width and heigth
 dis_width = 800
@@ -41,7 +39,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
     games_counter = 0
 
     # Some printing for debugging purposes
-    if detailed_console_outputs:
+    if verbose:
         print("Games counter initialised.")
         print("Games counter:", games_counter)
     
@@ -96,7 +94,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
         games_counter += 1
 
         # Some printing for debugging purposes
-        if detailed_console_outputs:
+        if verbose:
             print("Games counter incremented.")
             print("Games counter:", games_counter)
 
@@ -167,7 +165,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
             if snake_List == []:
                 
                 # Some printing for debugging purposes
-                if detailed_console_outputs:
+                if verbose:
                     print('First iteration - Snake goes up automatically.')
 
                 # Pass the command that refers to 'go up', either in manual or in automatic mode
@@ -222,7 +220,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
                 game_close = True
         
             # Some printing for debugging purposes
-            if detailed_console_outputs:
+            if verbose:
                 print(f'Moves : {moves}, age : {age}')
     
             # If the snake hit a wall, the game is over
