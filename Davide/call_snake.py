@@ -44,6 +44,13 @@ class Individual():
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
                 moves_till_stuck = 50):
+        
+        self.input_dim = input_dim
+        self.sight_dist = sight_dist
+        self.games_to_play = games_to_play
+        self.verbose = verbose
+        self.fitness_function = fitness_function
+        self.moves_till_stuck = moves_till_stuck
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -63,12 +70,6 @@ class Individual():
             self.model.set_weights(weights)
 
         self.weights = self.model.get_weights()
-        self.input_dim = input_dim
-        self.sight_dist = sight_dist
-        self.games_to_play = games_to_play
-        self.verbose = verbose
-        self.fitness_function = fitness_function
-        self.moves_till_stuck = moves_till_stuck
         # Play a game
         self.play()
         
@@ -257,6 +258,7 @@ class Population:
             individual = Individual(i+1, evolution_step  = self.evolution_step,
                                     verbose = self.verbose,
                                     moves_till_stuck = self.moves_till_stuck)
+            
             self.individuals.append(individual)
             
     def __len__(self):
