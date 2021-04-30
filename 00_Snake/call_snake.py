@@ -33,7 +33,7 @@ import math
 from copy import deepcopy
 from utils import phen_variance, gen_variance, phen_entropy, gen_entropy, fs
 
-use_tqdm = False
+use_tqdm = True
    
 # Class Individual. Instances of this class play snake and make up a population.
 class Individual():
@@ -45,7 +45,7 @@ class Individual():
                 verbose = False,
                 input_dim = 53,
                 sight_dist = 3,
-                games_to_play = 1,
+                games_to_play = 2,
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
                 moves_till_stuck = 50):
@@ -318,7 +318,7 @@ class Population:
         return self.individuals
 
     # Dave's evolve method. Will keep it here for now for inspiration
-        if False:
+        if True:
             # evolve(self,
                     # gens, #Number of generations to be produced
                     # select, #Selection function
@@ -393,7 +393,7 @@ class Population:
 
 
 
-if False:
+if True:
     # This is where the execution of this script starts.
     if __name__ == '__main__':
 
@@ -404,8 +404,8 @@ if False:
         keep_evolving = True
 
         # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
-        pop_size = 5
-        population = Population(pop_size, verbose=True)
+        pop_size = 4
+        population = Population(pop_size, verbose=False)
         
         # While we want to keep evolving... 
         while keep_evolving:
