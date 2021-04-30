@@ -313,6 +313,10 @@ class Population:
                     self.phen_entropy_dict[str(self.evolution_step)] = phen_entropy(self)
                     self.gen_entropy_dict[str(self.evolution_step)] = gen_entropy(self)
                 
+                #normalizing the fitness 
+                for ind in self.individuals:
+                    ind.fitness = ind.fitness / new_moves_till_stuck
+                
                 #FITNESS SHARING
                 if fitness_sharing: #argument of evolve attribute
                     fs(self)
@@ -371,9 +375,7 @@ class Population:
                 
                 self.individuals = new_pop
                 
-                #normalizing the fitness 
-                for ind in self.individuals:
-                    ind.fitness = ind.fitness / new_moves_till_stuck
+                
                 
                 #updating the evolution step                
                 self.evolution_step += 1
