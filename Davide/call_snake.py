@@ -306,9 +306,10 @@ class Population:
                     fs(self)
                 
                 #Elitism
-                if elitism == True: #argument of evolve attribute
+                if elitism: #argument of evolve attribute
                     #saving a deepcopy of the best individual of the population
                     elite = max(self.individuals, key = attrgetter('fitness')).weights
+                    
                 new_pop = []
                 while len(new_pop) < self.size:
                     if tournament_size != None:
@@ -337,13 +338,14 @@ class Population:
                                               weights = offspring1.weights,
                                               moves_till_stuck = new_moves_till_stuck,
                                               evolution_step = gen + 1))
+                   
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(ind_number = len(new_pop),
                                                   weights = offspring1.weights,
                                                   moves_till_stuck = new_moves_till_stuck,
                                                   evolution_step = gen + 1))
                 
-                if elitism == True: #argument of evolve attribute
+                if elitism: #argument of evolve attribute
                     #finding worst Individual of the new population
                     least_fit = min(new_pop, key = attrgetter('fitness'))
                     #substituting the worst individual of the new population with the best one from the previous one
