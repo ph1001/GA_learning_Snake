@@ -20,9 +20,10 @@ def geometric_mutation(individual, constant_ms):
     """
     #decrement of the constant_ms
     constant_ms = constant_ms / (individual.evolution_step + 1)
-    
+    #making a copy of the parent
+    weights = individual.weights.copy()
     #We iterate over the weights (matrix, array, matrix, array) 
-    for i,matrix in enumerate(individual):
+    for i, matrix in enumerate(weights):
         
         if i == 0 or i == 2: #check if we are handling a matrix
             for i in range(matrix.shape[0]): #we iterate over the matrix
@@ -35,6 +36,8 @@ def geometric_mutation(individual, constant_ms):
                 shift = uniform(-constant_ms, constant_ms)
                 matrix[i] += shift 
     
+    return weights
+    
     
 
 def normal_distribution_mutation(individual):
@@ -46,8 +49,10 @@ def normal_distribution_mutation(individual):
     Returns:
         Indivdual: mutated Individual
     """
+    #making a copy of the parent
+    weights = individual.weights.copy()
     #We iterate over the weights (matrix, array, matrix, array) 
-    for i,matrix in enumerate(individual):
+    for i,matrix in enumerate(weights):
         
         if i == 0 or i == 2: #check if we are handling a matrix
             for i in range(matrix.shape[0]): #we iterate over the matrix
@@ -58,6 +63,8 @@ def normal_distribution_mutation(individual):
         else: #otherwise we are handling an array
             for i in range(len(matrix)): #iterate over array
                 shift = randn()
-                matrix[i] += shift 
+                matrix[i] += shift
+    
+    return weights
     
     

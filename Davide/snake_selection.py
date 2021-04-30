@@ -15,7 +15,7 @@ def fps(pop):
 
 
 def tournament(pop, size):
-    #SHOULD WE PUT A FIXED SIZE (10%/5% of the population)
+    #SHOULD WE PUT A FIXED SIZE (10%/5% of the population)?
     # Select individuals based on tournament size
     tournament = sample(pop.individuals, size)
     # Return the fittest inividuals from the sample
