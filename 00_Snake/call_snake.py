@@ -22,6 +22,7 @@ Created on Mon Apr 26 16:36:47 2021
 
 # Import libraries and components from snake
 from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode
+from snake_nodisplay import controlled_run_nodisplay, dis_width_nodisplay, dis_height_nodisplay, snake_block_nodisplay
 import numpy as np
 from keras import layers, models
 from random import random, randint
@@ -43,7 +44,7 @@ class Individual():
                 games_to_play = 1,
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
-                moves_till_stuck = 50):
+                moves_till_stuck = 50): #wheter to show the snake game window
         
         self.input_dim = input_dim
         self.sight_dist = sight_dist
@@ -86,14 +87,17 @@ class Individual():
         return f'Neural Network with {self.input_dim} input nodes, {self.model.layers[0].weights[1].shape[0]} hidden layer neurons and {self.model.layers[1].weights[1].shape[0]} output layer neurons'
          
     # Define a function that lets an individual play snake
-    def play(self):
+    def play(self, show = False):
 
         # Start the game by calling the function controlled_run from snake.py and receive the fitness resulting 
         # from the games_to_play games played by this individual in this evolution step
         # MOVED games_to_play here, defined together with the individual
         
         #the controlled_run function return the score and the age of the Individual
-        score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
+        if show:
+            score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
+        else:
+            score, age = controlled_run_nodisplay(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
         
         self.score = score
         self.age = age
