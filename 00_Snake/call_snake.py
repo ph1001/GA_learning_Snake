@@ -44,7 +44,8 @@ class Individual():
                 games_to_play = 1,
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
-                moves_till_stuck = 50): #wheter to show the snake game window
+                moves_till_stuck = 50,
+                show = False): #wheter to show the snake game window
         
         self.input_dim = input_dim
         self.sight_dist = sight_dist
@@ -52,6 +53,7 @@ class Individual():
         self.verbose = verbose
         self.fitness_function = fitness_function
         self.moves_till_stuck = moves_till_stuck
+        self.show = show
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -94,7 +96,7 @@ class Individual():
         # MOVED games_to_play here, defined together with the individual
         
         #the controlled_run function return the score and the age of the Individual
-        if show:
+        if self.show or show:
             score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
         else:
             score, age = controlled_run_nodisplay(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
@@ -248,20 +250,24 @@ class Population:
                  verbose = False,
                  evolution_step = 0,
                  moves_till_stuck = 50,
+                 show = False,
                  **kwargs):
         self.individuals = []
         self.size = size
         self.verbose = verbose
         self.evolution_step = evolution_step
         self.moves_till_stuck = moves_till_stuck
+        self.show = show
         
         
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
         # of class Individual, which then will result in this individual playing snake.
         for i in tqdm(range(size)):
-            individual = Individual(i+1, evolution_step  = self.evolution_step,
+            individual = Individual(ind_number = i+1,
+                                    evolution_step  = self.evolution_step,
                                     verbose = self.verbose,
-                                    moves_till_stuck = self.moves_till_stuck)
+                                    moves_till_stuck = self.moves_till_stuck,
+                                    show = self.show)
             
             self.individuals.append(individual)
             
@@ -365,6 +371,7 @@ class Population:
                 
                 self.individuals = new_pop
                 
+                #normalizing the fitness 
                 for ind in self.individuals:
                     ind.fitness = ind.fitness / new_moves_till_stuck
                 

@@ -11,7 +11,7 @@ from snake_mutation import geometric_mutation, normal_distribution_mutation
 from snake_selection import fps, tournament, ranking
 
 snakes = Population(size = 20, 
-                    moves_till_stuck= 75)
+                    moves_till_stuck = 50)
 
 snakes.evolve(  gens = 50, #Number of generations to be produced
                 select = tournament, #Selection function
@@ -22,5 +22,5 @@ snakes.evolve(  gens = 50, #Number of generations to be produced
                 constant_ms = 7, #Geometric Mutation coefficient 
                 tournament_size = 4,
                 elitism = True, #wheter to perform elitisim
-                record_diversity = False, #wheter to record diversity
-                fitness_sharing = True)
+                record_diversity = True, #wheter to record diversity
+                fitness_sharing = False)
