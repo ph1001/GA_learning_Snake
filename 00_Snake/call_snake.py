@@ -136,8 +136,8 @@ class Individual():
         # Compute the "field of vision" of the snake; it is made up of a square array with the length of 1+2*sight_dist
         # Side note: Possible positions in the game grid (without hitting the wall): Min: (0,0), Max: (790,590) - This is specified in snake.py
         
-        # Initialise a field of vision with all zeros
-        fov = np.zeros((edge_length, edge_length))
+        # Initialise a field of vision with all elemente being 0.5 (0.5 means neutral)
+        fov = np.zeros((edge_length, edge_length)) + 0.5
         
         # Give the snake's head, snake_List, foodx, and foody shorter names
         s_head = game_state['snake_Head']
@@ -158,19 +158,19 @@ class Individual():
 
                 # Check if the currently looked at field of vision element contains a part of our snake
                 snake_body = [x, y] in s_list
-                # If so, write -1 in the respective field of vision cell
+                # If so, write 0 in the respective field of vision cell (0 means not good)
                 if snake_body:
-                    fov[i,j] = -1
+                    fov[i,j] = 0
 
                 # Check if the currently looked at field of vision element is outside the allowed grid
                 outside_grid = x >= dis_width or x < 0 or y >= dis_height or y < 0
-                # If so, write -1 in the respective field of vision cell
+                # If so, write 0 in the respective field of vision cell (0 means not good)
                 if outside_grid:
-                    fov[i,j] = -1
+                    fov[i,j] = 0
 
                 # Check if the currently looked at field of vision element contains food
                 food = (x == fx and y == fy)
-                # If so, write 1 in the respective field of vision cell
+                # If so, write 1 in the respective field of vision cell (1 means good)
                 if food:
                     fov[i,j] = 1
 
