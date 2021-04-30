@@ -315,35 +315,37 @@ class Population:
                 new_pop = []
                 while len(new_pop) < self.size:
                     if tournament_size != None:
-                        offspring1, offspring2 = select(self, tournament_size), select(self, tournament_size)
+                        parent1, parent2 = select(self, tournament_size), select(self, tournament_size)
                     else:
-                        offspring1, offspring2 = select(self), select(self) #argument of evolve attribute
+                        parent1, parent2 = select(self), select(self) #argument of evolve attribute
                     # Crossover
                     if random() < co_p: #argument of evolve attribute
-                        crossover(offspring1, offspring2) #argument of evolve attribute
+                        offspring1, offspring2 = crossover(parent1, parent2) #argument of evolve attribute
+                    else:
+                        offspring1, offspring2 = parent1.weights.copy(), parent2.weights.copy()
                         
                     # Mutation
                     if random() < mu_p: #argument of evolve attribute
                         if constant_ms != None:
                             #GEOMETRIC MUTATION
-                            mutate(offspring1, constant_ms) #argument of evolve attribute
+                            offspring1 = mutate(offspring1, constant_ms, self.evolution_step) #argument of evolve attribute
                         else:
-                            mutate(offspring1)
+                            offspring1 = mutate(offspring1)
                     if random() < mu_p: #argument of evolve attribute
                         if constant_ms != None:
                             #GEOMETRIC MUTATION
-                            mutate(offspring2, constant_ms) #argument of evolve attribute
+                            offspring2 = mutate(offspring2, constant_ms, self.evolution_step) #argument of evolve attribute
                         else:
-                            mutate(offspring2)
+                            offspring2 = mutate(offspring2)
     
                     new_pop.append(Individual(ind_number = len(new_pop),
-                                              weights = offspring1.weights,
+                                              weights = offspring1,
                                               moves_till_stuck = new_moves_till_stuck,
                                               evolution_step = gen + 1))
                    
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(ind_number = len(new_pop),
-                                                  weights = offspring1.weights,
+                                                  weights = offspring1,
                                                   moves_till_stuck = new_moves_till_stuck,
                                                   evolution_step = gen + 1))
                 
