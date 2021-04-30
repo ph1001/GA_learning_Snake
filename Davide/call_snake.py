@@ -21,7 +21,7 @@ Created on Mon Apr 26 16:36:47 2021
 # This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
 # Import libraries and components from snake
-from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode, detailed_console_outputs
+from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode
 import numpy as np
 from keras import layers, models
 from random import random, randint
@@ -53,7 +53,7 @@ class Individual():
         self.evolution_step = evolution_step
 
         # Print game's width, height and snake's width
-        if detailed_console_outputs:
+        if self.verbose:
             print(dis_width, dis_height, snake_block)
 
         # Create a neural network that will learn to play snake
@@ -109,21 +109,21 @@ class Individual():
     def control(self, game_state):
 
         # Some printing for debugging purposes
-        if detailed_console_outputs:
+        if self.verbose:
             print("control() was called.")
 
         # In the very first iteration, simply pass "up"
         if game_state['snake_List'] == []:
 
             # Some printing for debugging purposes
-            if detailed_console_outputs:
+            if self.verbose:
                 print('"Up" was passed automatically.')
             return 'w'
 
         # Process the information received about the current state of the game
 
         # Some printing for debugging purposes
-        if detailed_console_outputs:
+        if self.verbose:
             print('snake_List:', game_state['snake_List'])
             print('snake_Head:', game_state['snake_Head'])
             print('food position:', game_state['foodx'], game_state['foody'])
@@ -212,7 +212,7 @@ class Individual():
  
         # Some printing for debugging purposes
         # print input and output
-        if detailed_console_outputs:
+        if self.verbose:
             print(f'Input without vision matrix: {input_nn[:,:4]}')
             print('Vision matrix:')
             print(fov)
@@ -277,6 +277,7 @@ class Population:
                 mutate, #Mutation function
                 co_p, #crossover probability
                 mu_p, #mutation probability
+                tournament_size = None, #size of the sample for the tournament selction
                 constant_ms = None, #Geometric Mutation coefficient 
                 elitism = False, #wheter to perform elitisim
                 record_diversity = False, #wheter to record diversity
@@ -290,7 +291,9 @@ class Population:
             
         for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
                 
-            
+        
+                new_moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2))
+                
                 #recording the variance of the Population
                 if record_diversity: #argument of evolve attribute
                     
@@ -309,7 +312,10 @@ class Population:
                     elite = max(self.individuals, key = attrgetter('fitness')).weights
                 new_pop = []
                 while len(new_pop) < self.size:
-                    offspring1, offspring2 = select(self), select(self) #argument of evolve attribute
+                    if tournament_size != None:
+                        offspring1, offspring2 = select(self, tournament_size), select(self, tournament_size)
+                    else:
+                        offspring1, offspring2 = select(self), select(self) #argument of evolve attribute
                     # Crossover
                     if random() < co_p: #argument of evolve attribute
                         crossover(offspring1, offspring2) #argument of evolve attribute
@@ -330,12 +336,12 @@ class Population:
     
                     new_pop.append(Individual(ind_number = len(new_pop),
                                               weights = offspring1.weights,
-                                              moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2)),
+                                              moves_till_stuck = new_moves_till_stuck,
                                               evolution_step = gen + 1))
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(ind_number = len(new_pop),
                                                   weights = offspring1.weights,
-                                                  moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2)),
+                                                  moves_till_stuck = new_moves_till_stuck,
                                                   evolution_step = gen + 1))
                 
                 if elitism == True: #argument of evolve attribute
@@ -344,10 +350,14 @@ class Population:
                     #substituting the worst individual of the new population with the best one from the previous one
                     new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
                                                                    weights = elite,
-                                                                   moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2)),
+                                                                   moves_till_stuck = new_moves_till_stuck,
                                                                    evolution_step = gen + 1)
+                    
                 
                 self.individuals = new_pop
+                
+                for ind in self.individuals:
+                    ind.fitness = ind.fitness / new_moves_till_stuck
                 
                 #updating the evolution step                
                 self.evolution_step += 1
