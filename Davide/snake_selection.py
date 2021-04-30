@@ -22,8 +22,6 @@ def tournament(pop, size=20):
 
 
 def ranking(pop):
-    # Get the total number of individuals present in the ranking
-    total_indivs = len(pop)
     # Create a ranking list
     rank_list = list(range(1, len(pop)+1))
     # Sort the individuals according to their fitness values

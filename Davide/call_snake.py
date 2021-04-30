@@ -22,19 +22,15 @@ Created on Mon Apr 26 16:36:47 2021
 
 # Import libraries and components from snake
 from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode, detailed_console_outputs
-from snake_crossover import arithmetic_co
-from snake_selection import fps, tournament, ranking
 import numpy as np
 from keras import layers, models
-from random import sample, random, randint
+from random import random, randint
 from tqdm import tqdm
 from operator import  attrgetter
 import math
 from copy import deepcopy
 from utils import phen_variance, gen_variance, phen_entropy, gen_entropy, fs
 
-use_tqdm = False
-   
 # Class Individual. Instances of this class play snake and make up a population.
 class Individual():
 
@@ -247,23 +243,22 @@ class Population:
                  size,
                  verbose = False,
                  evolution_step = 1,
+                 moves_till_stuck = 50,
                  **kwargs):
         self.individuals = []
         self.size = size
         self.verbose = verbose
         self.evolution_step = evolution_step
+        self.moves_till_stuck = moves_till_stuck
         
         
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
         # of class Individual, which then will result in this individual playing snake.
-        if use_tqdm:
-            for i in tqdm(range(size), desc = 'Building Population'):
-                individual = Individual(i+1, self.evolution_step, self.verbose)
-                self.individuals.append(individual)
-        else:
-            for i in range(size):
-                individual = Individual(i+1, self.evolution_step, self.verbose)
-                self.individuals.append(individual)
+        for i in tqdm(range(size)):
+            individual = Individual(i+1, evolution_step  = self.evolution_step,
+                                    verbose = self.verbose,
+                                    moves_till_stuck = self.moves_till_stuck)
+            self.individuals.append(individual)
             
     def __len__(self):
         return len(self.individuals)
@@ -273,65 +268,21 @@ class Population:
 
     def __repr__(self):
         return f"Population(size={len(self.individuals)})"
+    
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
-    #def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
-    def evolve(self):
-
-        # IMPLEMENT HERE: Genetic evolution of the population
-
-
-
-        ########
-        # CODE #
-        ########
-
-
-
-        # ARITHMETIC CROSSOVER
-
-        # CHANGE THIS ACCORDING TO HOW WE WANT TO DO THIS - For now: Get two random indices from our population and get the corresponding individuals
-        parents_indices = sample(range(len(self.individuals)), 2)
-
-        # Perform arithmetic crossover on those two parents.
-        # This will change the weights of these individuals! This means that there is no need to catch what the function returns
-        # because it writes the changes into our original individuals. The parents become the offspring.
-        arithmetic_co(self.individuals[parents_indices[0]], self.individuals[parents_indices[1]])
-
-
-
-        ########
-        # CODE #
-        ########
-
-
-
-        # Update the population's evolution step
-        self.evolution_step += 1
-        if self.verbose:
-            print()
-            print("Evolution step updated. New evolution step:", self.evolution_step)
-
-        # Update each individual's evolution_step
-        for indiv in self.individuals:
-            indiv.evolution_step = self.evolution_step
-
-        return self.individuals
-
-    # Dave's evolve method. Will keep it here for now for inspiration
-        if False:
-            # evolve(self,
-                    # gens, #Number of generations to be produced
-                    # select, #Selection function
-                    # crossover, #Crossover function
-                    # mutate, #Mutation function
-                    # constant_ms = None, #Geometric Mutation coefficient 
-                    # co_p, #crossover probability
-                    # mu_p, #mutation probability
-                    # elitism = False, #wheter to perform elitisim
-                    # record_diversity = False, #wheter to record diversity
-                    # fitness_sharing = False #wheter to perform fitness sharing
-                    # )
-            for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
+    def evolve( self,
+                gens, #Number of generations to be produced
+                select, #Selection function
+                crossover, #Crossover function
+                mutate, #Mutation function
+                co_p, #crossover probability
+                mu_p, #mutation probability
+                constant_ms = None, #Geometric Mutation coefficient 
+                elitism = False, #wheter to perform elitisim
+                record_diversity = False, #wheter to record diversity
+                fitness_sharing = False): #wheter to perform fitness sharing
+            
+        for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
                 
             
                 #recording the variance of the Population
@@ -390,41 +341,3 @@ class Population:
                     indiv.evolution_step = self.evolution_step
          
                 print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
-
-
-
-if False:
-    # This is where the execution of this script starts.
-    if __name__ == '__main__':
-
-        # Initialise an evolution step counter
-        evolution_step = 1
-
-        # Initialise a boolean that says that evolution should go on
-        keep_evolving = True
-
-        # Define how large our population should be and initialise it by calling Population (and executing its __init__ function)
-        pop_size = 5
-        population = Population(pop_size, verbose=True)
-        
-        # While we want to keep evolving... 
-        while keep_evolving:
-
-            # Increment evolution_step
-            evolution_step += 1
-
-            # Evolve our population
-            population.evolve()
-
-            # Let evolved population play
-            for i in population:
-                i.play()
-
-            # REMOVE THIS LATER; Should be replaced by something that sets keep_evolving to False if optimum is reached.
-            # For now this defines after how many evolutions steps the program terminates.
-            if evolution_step >= 3:
-                keep_evolving = False
-
-        # Print a final message to show that the program finished executing.
-        print()
-        print('All done.')
