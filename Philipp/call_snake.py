@@ -26,8 +26,7 @@ from snake_crossover import arithmetic_co
 from snake_selection import fps, tournament, ranking
 import numpy as np
 from keras import layers, models
-import random
-from random import sample, random
+from random import sample, random, randint
 from tqdm import tqdm
 from operator import  attrgetter
 import math
@@ -66,7 +65,7 @@ class Individual():
         self.model.add(layers.Dense(64, activation = 'relu', input_dim = input_dim))
         self.model.add(layers.Dense(4, activation = 'softmax'))
         if weights != None:
-            model.set_weights(weights)
+            self.model.set_weights(weights)
 
         self.weights = self.model.get_weights()
         self.input_dim = input_dim
