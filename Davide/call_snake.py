@@ -242,7 +242,7 @@ class Population:
     def __init__(self, 
                  size,
                  verbose = False,
-                 evolution_step = 1,
+                 evolution_step = 0,
                  moves_till_stuck = 50,
                  **kwargs):
         self.individuals = []
@@ -281,6 +281,12 @@ class Population:
                 elitism = False, #wheter to perform elitisim
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = False): #wheter to perform fitness sharing
+    
+        if record_diversity:
+            self.phen_variance_dict = {}
+            self.gen_variance_dict = {}
+            self.phen_entropy_dict = {}
+            self.gen_entropy_dict = {}
             
         for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
                 
@@ -300,8 +306,7 @@ class Population:
                 #Elitism
                 if elitism == True: #argument of evolve attribute
                     #saving a deepcopy of the best individual of the population
-                    elite = deepcopy(max(self.individuals, key = attrgetter('fitness')))
-                    
+                    elite = max(self.individuals, key = attrgetter('fitness')).weights
                 new_pop = []
                 while len(new_pop) < self.size:
                     offspring1, offspring2 = select(self), select(self) #argument of evolve attribute
@@ -323,15 +328,24 @@ class Population:
                         else:
                             mutate(offspring2)
     
-                    new_pop.append(Individual(weights = offspring1.weights))
+                    new_pop.append(Individual(ind_number = len(new_pop),
+                                              weights = offspring1.weights,
+                                              moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2)),
+                                              evolution_step = gen + 1))
                     if len(new_pop) < self.size:
-                        new_pop.append(Individual(weights = offspring1.weights))
+                        new_pop.append(Individual(ind_number = len(new_pop),
+                                                  weights = offspring1.weights,
+                                                  moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2)),
+                                                  evolution_step = gen + 1))
                 
                 if elitism == True: #argument of evolve attribute
                     #finding worst Individual of the new population
                     least_fit = min(new_pop, key = attrgetter('fitness'))
                     #substituting the worst individual of the new population with the best one from the previous one
-                    new_pop[new_pop.index(least_fit)] = elite
+                    new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                   weights = elite,
+                                                                   moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2)),
+                                                                   evolution_step = gen + 1)
                 
                 self.individuals = new_pop
                 
@@ -340,4 +354,7 @@ class Population:
                 for indiv in self.individuals:
                     indiv.evolution_step = self.evolution_step
          
-                print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
+                print(f'Best Individual: {max(self, key=attrgetter("fitness")).fitness}')
+            
+        # if record_diversity:
+        #     return phen_variance_dict, gen_variance_dict, phen_entropy_dict, gen_entropy_dict
