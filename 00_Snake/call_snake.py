@@ -44,7 +44,7 @@ class Individual():
                 games_to_play = 1,
                 #with this function an individual that eat at least one apple is always preferred to
                 # one that surivived more but never ate an apple(TO AVOID STUCK INDIVIDUALS), all 
-                # this is made with the assumption that the moved_till_stuck is set to 200
+                # this is made with the assumption that the moved_till_stuck is set to 50
                 fitness_function = lambda x,y: x*math.exp(y) if y == 0 else x*math.exp(y) + 51, 
                 weights = None,
                 moves_till_stuck = 200,
