@@ -7,6 +7,7 @@ Created on Tue Apr 27 16:19:09 2021
 
 from random import randint, sample, uniform
 from numpy.random import randn
+import math
 
 
 def geometric_mutation(individual, constant_ms, evolution_step):
@@ -19,11 +20,13 @@ def geometric_mutation(individual, constant_ms, evolution_step):
         Indivdual: mutated Individual
     """
     #decrement of the constant_ms
-    constant_ms = constant_ms / (evolution_step + 1)
+    constant_ms = constant_ms / (evolution_step + 1) - 9
+    #NEW FUNCTION 
+    # constant_ms = 1/math.exp(-constant_ms + evolution_step + 1)
     #We iterate over the weights (matrix, array, matrix, array) 
-    for i, matrix in enumerate(individual):
+    for index, matrix in enumerate(individual):
         
-        if i == 0 or i == 2: #check if we are handling a matrix
+        if len(matrix.shape) > 1: #check if we are handling a matrix
             for i in range(matrix.shape[0]): #we iterate over the matrix
                 for j in range(matrix.shape[1]):
                     shift = uniform(-constant_ms, constant_ms) #we select the shift in the interval
@@ -47,10 +50,8 @@ def normal_distribution_mutation(individual):
     Returns:
         Indivdual: mutated Individual
     """
-    #making a copy of the parent
-    weights = individual.weights.copy()
     #We iterate over the weights (matrix, array, matrix, array) 
-    for i,matrix in enumerate(weights):
+    for i,matrix in enumerate(individual):
         
         if i == 0 or i == 2: #check if we are handling a matrix
             for i in range(matrix.shape[0]): #we iterate over the matrix
@@ -63,6 +64,6 @@ def normal_distribution_mutation(individual):
                 shift = randn()
                 matrix[i] += shift
     
-    return weights
+    return individual
     
     

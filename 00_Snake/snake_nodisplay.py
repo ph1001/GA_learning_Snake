@@ -11,8 +11,8 @@ Created on Fri Apr 30 17:16:05 2021
 import random
 
 # Define display width and heigth
-dis_width_nodisplay = 800
-dis_height_nodisplay = 600
+dis_width_nodisplay = 400
+dis_height_nodisplay = 400
 
 # Define the width of one snake square
 snake_block_nodisplay = 10
@@ -169,7 +169,7 @@ def controlled_run_nodisplay(individual, ind_number, evolution_step, games_to_pl
                 foodx = round(random.randrange(0, dis_width_nodisplay - snake_block_nodisplay) / 10.0) * 10.0
                 foody = round(random.randrange(0, dis_height_nodisplay - snake_block_nodisplay) / 10.0) * 10.0
                 Length_of_snake += 1
-                moves = 0
+                moves_till_stuck += 100
 
         # This would quit Pygame and our programm. We don't want that.
         #pygame.quit()

@@ -21,8 +21,8 @@ Created on Mon Apr 26 16:36:47 2021
 # This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
 # Import libraries and components from snake
-from snake import controlled_run, dis_width, dis_height, snake_block, automatic_mode
-from snake_nodisplay import controlled_run_nodisplay, dis_width_nodisplay, dis_height_nodisplay, snake_block_nodisplay
+from snake import controlled_run, dis_width, dis_height, snake_block
+from snake_nodisplay import controlled_run_nodisplay
 import numpy as np
 from keras import layers, models
 from random import random, randint
@@ -42,10 +42,15 @@ class Individual():
                 input_dim = 53,
                 sight_dist = 3,
                 games_to_play = 1,
-                fitness_function = lambda x,y: x*math.exp(y) ,
+                #with this function an individual that eat at least one apple is always preferred to
+                # one that surivived more but never ate an apple(TO AVOID STUCK INDIVIDUALS), all 
+                # this is made with the assumption that the moved_till_stuck is set to 200
+                fitness_function = lambda x,y: x*math.exp(y) if y == 0 else x*math.exp(y) + 51, 
                 weights = None,
-                moves_till_stuck = 50,
-                show = False): #wheter to show the snake game window
+                moves_till_stuck = 200,
+                show = False, #wheter to show the snake game window
+                automatic_mode = True,
+                hidden_layers = 1): 
         
         self.input_dim = input_dim
         self.sight_dist = sight_dist
@@ -54,6 +59,8 @@ class Individual():
         self.fitness_function = fitness_function
         self.moves_till_stuck = moves_till_stuck
         self.show = show
+        self.automatic_mode = automatic_mode
+        self.hidden_layers = hidden_layers
 
         # Give this individual a number
         self.ind_number = ind_number
@@ -67,7 +74,10 @@ class Individual():
 
         # Create a neural network that will learn to play snake
         self.model = models.Sequential()
-        self.model.add(layers.Dense(64, activation = 'relu', input_dim = input_dim))
+        
+        for _ in range(self.hidden_layers):
+            self.model.add(layers.Dense(64, activation = 'sigmoid', input_dim = input_dim))
+
         self.model.add(layers.Dense(4, activation = 'softmax'))
         if weights != None:
             self.model.set_weights(weights)
@@ -96,9 +106,11 @@ class Individual():
         # MOVED games_to_play here, defined together with the individual
         
         #the controlled_run function return the score and the age of the Individual
-        if self.show or show:
-            score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
-        else:
+        if self.show:
+            score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck, self.automatic_mode)
+        elif show:
+            score, age = controlled_run(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck, self.automatic_mode)
+        else: #only allowed in automatic mode
             score, age = controlled_run_nodisplay(self, self.ind_number, self.evolution_step, self.games_to_play, self.verbose, self.moves_till_stuck)
         
         self.score = score
@@ -189,43 +201,61 @@ class Individual():
         #distances to food
         distance_food_y = foody - y1
         distance_food_x = foodx - x1
+        
 
         # Create the NN's input and compute its output
         # Only in automatic mode though
-        if automatic_mode:
-            #SCALE INPUTS to [0,1]
-            distance_food_y_scaled = (distance_food_y + (dis_height - snake_block))/(2*(dis_height - snake_block))
-            distance_food_x_scaled = (distance_food_x + (dis_width - snake_block))/(2*(dis_width - snake_block))
-            snake_head_x_scaled = x1 / (dis_width - snake_block)
-            snake_head_y_scaled = y1 / (dis_height - snake_block)
+        
+        #SCALE INPUTS to [0,1]
+        # distance_food_y_scaled = (distance_food_y + (dis_height - snake_block)) / (2*(dis_height - snake_block))
+        # distance_food_x_scaled = (distance_food_x + (dis_width - snake_block)) / (2*(dis_width - snake_block))
+        # snake_head_x_scaled = x1 / (dis_width - snake_block)
+        # snake_head_y_scaled = y1 / (dis_height - snake_block)
 
-            # Create the input with the distance to food and the snake's position first
-            input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
-                        snake_head_x_scaled, snake_head_y_scaled]#snake head
+        # # Create the input with the distance to food and the snake's position first
+        # input_nn = np.array([distance_food_y_scaled, distance_food_x_scaled, #distances to food
+        #             snake_head_x_scaled, snake_head_y_scaled])#snake head
+        
+        distance_food_y = abs(foody - y1)
+        distance = math.sqrt(distance_food_y**2 +  distance_food_x**2)
+        alpha = abs(np.arcsin(distance_food_y / distance))
+        
+        scaled_alpha = alpha / np.arcsin(1)
+        
+        food_r = [1 if distance_food_x > 0 else 0][0]
+        food_l = [1 if distance_food_x < 0 else 0][0]
+        food_d = [1 if distance_food_y > 0 else 0][0]
+        food_u = [1 if distance_food_y < 0 else 0][0]
+        
+        input_nn = np.array([food_r,
+                             food_l,
+                             food_u,
+                             food_d,
+                             scaled_alpha])        
 
-            # Transorm input intpo np.array
-            input_nn = np.array(input_nn)
-            # Fixing the shape so it can be used for the NN
-            input_nn.shape = (1,4)
-            # Concatenating the vision matrix to the input array                
-            fov.shape = (1,49)
-            input_nn = np.concatenate((input_nn, fov), axis = 1)
-
-            # Producing output of the model, the output are probabilities
-            # for each move, using np.argmax to get the index of the 
-            # highest probability
-            output = np.argmax(self.model.predict(input_nn))
+        # # Fixing the shape so it can be used for the NN
+        input_nn.shape = (1,5)
+        # Concatenating the vision matrix to the input array                
+        fov.shape = (1,49)
+        input_nn = np.concatenate((input_nn, fov), axis = 1)
+        # input_nn = fov
+        
+        # Producing output of the model, the output are probabilities
+        # for each move, using np.argmax to get the index of the 
+        # highest probability
+        output = np.argmax(self.model.predict(input_nn))
  
         # Some printing for debugging purposes
         # print input and output
         if self.verbose:
-            print(f'Input without vision matrix: {input_nn[:,:4]}')
+            print(f'Input without vision matrix: {input_nn[:,:5]}')
             print('Vision matrix:')
+            print(f'Food distance: {distance_food_x, distance_food_y}')
             print(fov)
             print(f'Output : {output}')
 
         # If automatic_mode is False, the user is asked to provide an input (direction of the snake to go) via the keyboard with keys w, a, s, and d
-        if not automatic_mode:
+        if not self.automatic_mode:
 
             # Define some valid inputs (this will not be relevant anymore once the Neural Network is implemented)
             valid_inputs = ['w','a','s','d']
@@ -236,10 +266,15 @@ class Individual():
                 game_action = str(input())
                 if game_action in valid_inputs:
                     no_valid_input = False
+            
+            if self.verbose:
+                print(game_action)
 
         # If automatic_mode is True, use the NNs output as the decision on where to go next
-        if automatic_mode:
+        if self.automatic_mode:
             game_action = output
+            if self.verbose:
+                print(game_action)
 
         return game_action
 
@@ -249,8 +284,10 @@ class Population:
                  size,
                  verbose = False,
                  evolution_step = 0,
-                 moves_till_stuck = 50,
+                 moves_till_stuck = 200,
                  show = False,
+                 input_dim = 53,
+                 hidden_layers = 1,
                  **kwargs):
         self.individuals = []
         self.size = size
@@ -258,6 +295,8 @@ class Population:
         self.evolution_step = evolution_step
         self.moves_till_stuck = moves_till_stuck
         self.show = show
+        self.input_dim = input_dim
+        self.hidden_layers = hidden_layers
         
         
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
@@ -267,7 +306,9 @@ class Population:
                                     evolution_step  = self.evolution_step,
                                     verbose = self.verbose,
                                     moves_till_stuck = self.moves_till_stuck,
-                                    show = self.show)
+                                    show = self.show,
+                                    input_dim = self.input_dim,
+                                    hidden_layers = self.hidden_layers)
             
             self.individuals.append(individual)
             
@@ -302,9 +343,6 @@ class Population:
             
         for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
                 
-        
-                new_moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2))
-                
                 #recording the variance of the Population
                 if record_diversity: #argument of evolve attribute
                     
@@ -312,10 +350,6 @@ class Population:
                     self.gen_variance_dict[str(self.evolution_step)] = gen_variance(self) 
                     self.phen_entropy_dict[str(self.evolution_step)] = phen_entropy(self)
                     self.gen_entropy_dict[str(self.evolution_step)] = gen_entropy(self)
-                
-                #normalizing the fitness 
-                for ind in self.individuals:
-                    ind.fitness = ind.fitness / new_moves_till_stuck
                 
                 #FITNESS SHARING
                 if fitness_sharing: #argument of evolve attribute
@@ -354,14 +388,18 @@ class Population:
     
                     new_pop.append(Individual(ind_number = len(new_pop),
                                               weights = offspring1,
-                                              moves_till_stuck = new_moves_till_stuck,
-                                              evolution_step = gen + 1))
+                                              evolution_step = gen + 1,
+                                              moves_till_stuck = self.moves_till_stuck,
+                                              input_dim = self.input_dim,
+                                              hidden_layers = self.hidden_layers))
                    
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(ind_number = len(new_pop),
                                                   weights = offspring1,
-                                                  moves_till_stuck = new_moves_till_stuck,
-                                                  evolution_step = gen + 1))
+                                                  evolution_step = gen + 1,
+                                                  moves_till_stuck = self.moves_till_stuck,
+                                                  input_dim = self.input_dim,
+                                                  hidden_layers = self.hidden_layers))
                 
                 if elitism: #argument of evolve attribute
                     #finding worst Individual of the new population
@@ -369,12 +407,13 @@ class Population:
                     #substituting the worst individual of the new population with the best one from the previous one
                     new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
                                                                    weights = elite,
-                                                                   moves_till_stuck = new_moves_till_stuck,
-                                                                   evolution_step = gen + 1)
+                                                                   evolution_step = gen + 1,
+                                                                   moves_till_stuck = self.moves_till_stuck,
+                                                                   input_dim = self.input_dim,
+                                                                   hidden_layers = self.hidden_layers)
                     
                 
                 self.individuals = new_pop
-                
                 
                 
                 #updating the evolution step                

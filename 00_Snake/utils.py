@@ -7,7 +7,6 @@ Created on Wed Apr 28 14:40:35 2021
 #Functions that calculate the variance and the entropy, both phenotypic and genotypic
 
 from random import sample
-from scipy.spatial.distance import euclidean
 import math
 import numpy as np
 
@@ -21,7 +20,7 @@ def phen_variance(pop):
 def gen_variance(pop):
             #selecting a random individual to be the origin
             origin = sample(pop.individuals, 1)[0]
-            #calculating the distances of each point to the distance
+            #calculating the distances of each point to the origin
             distances = [ sum([ np.linalg.norm(ind[i] -  origin[i]) for i in range(len(ind)) ]) / len(ind) for ind in pop.individuals]
             #calculating the average distance over the population
             avg_distance = sum(distances) / pop.size
@@ -39,7 +38,7 @@ def gen_entropy(pop):
             origin = sample(pop.individuals, 1)[0]
             #calculating the distances of each point to the distance
             distances = [ sum([ np.linalg.norm(ind[i] - origin[i]) for i in range(len(ind)) ]) / len(ind) for ind in pop.individuals]
-            #calculating the variance over the population
+            #calculating the entropy over the population
             return sum([ distances.count(distance) / len(distances) * math.log(distances.count(distance) / len(distances), 2) for distance in distances])
 
 def fs(pop):

@@ -6,8 +6,8 @@ import pygame
 
 
 # Define display width and heigth
-dis_width = 800
-dis_height = 600
+dis_width = 400
+dis_height = 400
 
 # Define the width of one snake square
 snake_block = 10
@@ -32,7 +32,7 @@ automatic_mode = True
 # Define a function that executes games_to_play games for a given individual 
 # and that returns a fitness computed as the average of the fitnesses resulting from these games.
 # games_to_play is defined above.
-def controlled_run(individual, ind_number, evolution_step, games_to_play, verbose, moves_till_stuck):
+def controlled_run(individual, ind_number, evolution_step, games_to_play, verbose, moves_till_stuck, automatic_mode):
 
     # Initialize a games counter as a global variable
     global games_counter
@@ -87,7 +87,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
     
     # Define a function that executes the Snake game. It calls itself recursively if games_to_play is greater than 1
     # It returns a list of the fitnesses that result from these games (if games_to_play >1) // this game (if games_to_play = 1)
-    def gameLoop(score_list, age_list, verbose, moves_till_stuck):
+    def gameLoop(score_list, age_list, verbose, moves_till_stuck, automatic_mode):
         
         # Increment the games counter
         global games_counter
@@ -145,11 +145,11 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
                                 game_over = True
                                 game_close = False
                             if event.key == pygame.K_c:
-                                score_list, age_list = gameLoop(score_list, age_list, verbose, moves_till_stuck)
+                                score_list, age_list = gameLoop(score_list, age_list, verbose, moves_till_stuck, automatic_mode)
                 # By comparing the current value of games_counter with the value of games_to_play in automatic mode
                 if automatic_mode:
                     if games_counter < games_to_play:
-                        score_list, age_list = gameLoop(score_list, age_list, verbose, moves_till_stuck)
+                        score_list, age_list = gameLoop(score_list, age_list, verbose, moves_till_stuck, automatic_mode)
                     else:
                         game_over = True
                         game_close = False
@@ -265,7 +265,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
                 foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
                 foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
                 Length_of_snake += 1
-                moves = 0
+                moves_till_stuck += 100
     
             # Let the clock iterate
             clock.tick(snake_speed)
@@ -289,7 +289,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
 
     # Call gameLoop, passing the empty list of fitnesses to it and receiving the list of fitnesses 
     # from it that results from the games_to_play games for this individual in this evolution step
-    score_list, age_list = gameLoop(score_list, age_list, verbose, moves_till_stuck)
+    score_list, age_list = gameLoop(score_list, age_list, verbose, moves_till_stuck, automatic_mode)
 
     # Print the list of fitnesses of this individual in this evolution step
     
