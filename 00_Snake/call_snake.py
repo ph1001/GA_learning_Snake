@@ -293,7 +293,9 @@ class Population:
                 elitism = False, #wheter to perform elitisim
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = False): #wheter to perform fitness sharing
-    
+        
+        self.evolution_process = []
+        
         if record_diversity:
             self.phen_variance_dict = {}
             self.gen_variance_dict = {}
@@ -381,6 +383,9 @@ class Population:
                 self.evolution_step += 1
                 for indiv in self.individuals:
                     indiv.evolution_step = self.evolution_step
-         
-                print(f'Best Individual: {max(self, key=attrgetter("fitness")).fitness}')
+                    
+                
+                best_fit = max(self, key=attrgetter("fitness")).fitness
+                self.evolution_process.append(best_fit)
+                print(f'Best Individual: {best_fit}')
             
