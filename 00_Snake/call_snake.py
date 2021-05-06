@@ -304,8 +304,7 @@ class Population:
             
         for gen in tqdm(range(gens), desc = 'Evolving Population'): #argument of evolve attribute
                 
-        
-                new_moves_till_stuck = round(self.moves_till_stuck * math.log(gen+2))
+    
                 
                 #recording the variance of the Population
                 if record_diversity: #argument of evolve attribute
@@ -314,10 +313,6 @@ class Population:
                     self.gen_variance_dict[str(self.evolution_step)] = gen_variance(self) 
                     self.phen_entropy_dict[str(self.evolution_step)] = phen_entropy(self)
                     self.gen_entropy_dict[str(self.evolution_step)] = gen_entropy(self)
-                
-                #normalizing the fitness 
-                for ind in self.individuals:
-                    ind.fitness = ind.fitness / new_moves_till_stuck
                 
                 #FITNESS SHARING
                 if fitness_sharing: #argument of evolve attribute
@@ -356,13 +351,13 @@ class Population:
     
                     new_pop.append(Individual(ind_number = len(new_pop),
                                               weights = offspring1,
-                                              moves_till_stuck = new_moves_till_stuck,
+                                              moves_till_stuck = self.moves_till_stuck,
                                               evolution_step = gen + 1))
                    
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(ind_number = len(new_pop),
                                                   weights = offspring1,
-                                                  moves_till_stuck = new_moves_till_stuck,
+                                                  moves_till_stuck = self.moves_till_stuck,
                                                   evolution_step = gen + 1))
                 
                 if elitism: #argument of evolve attribute
@@ -371,7 +366,7 @@ class Population:
                     #substituting the worst individual of the new population with the best one from the previous one
                     new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
                                                                    weights = elite,
-                                                                   moves_till_stuck = new_moves_till_stuck,
+                                                                   moves_till_stuck = self.moves_till_stuck,
                                                                    evolution_step = gen + 1)
                     
                 

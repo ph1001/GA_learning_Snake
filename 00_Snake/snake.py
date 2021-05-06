@@ -265,7 +265,7 @@ def controlled_run(individual, ind_number, evolution_step, games_to_play, verbos
                 foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
                 foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
                 Length_of_snake += 1
-                moves = 0
+                moves_till_stuck += 100
     
             # Let the clock iterate
             clock.tick(snake_speed)
