@@ -11,8 +11,8 @@ Created on Fri Apr 30 17:16:05 2021
 import random
 
 # Define display width and heigth
-dis_width_nodisplay = 800
-dis_height_nodisplay = 600
+dis_width_nodisplay = 200
+dis_height_nodisplay = 200
 
 # Define the width of one snake square
 snake_block_nodisplay = 10

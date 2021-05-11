@@ -23,7 +23,7 @@ def geometric_mutation(individual, constant_ms, evolution_step):
     #We iterate over the weights (matrix, array, matrix, array) 
     for i, matrix in enumerate(individual):
         
-        if i == 0 or i == 2: #check if we are handling a matrix
+        if len(matrix.shape) > 1: #check if we are handling a matrix
             for i in range(matrix.shape[0]): #we iterate over the matrix
                 for j in range(matrix.shape[1]):
                     shift = uniform(-constant_ms, constant_ms) #we select the shift in the interval
