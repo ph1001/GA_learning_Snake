@@ -6,8 +6,8 @@ import pygame
 
 
 # Define display width and heigth
-dis_width = 200
-dis_height = 200
+dis_width = 400
+dis_height = 400
 
 # Define the width of one snake square
 snake_block = 10

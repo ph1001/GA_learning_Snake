@@ -45,7 +45,8 @@ class Individual():
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
                 moves_till_stuck = 50,
-                show = False): #wheter to show the snake game window
+                show = False, #wheter to show the snake game window
+                hidden_layers = 1):
         
         self.input_dim = input_dim
         self.sight_dist = sight_dist
@@ -54,6 +55,7 @@ class Individual():
         self.fitness_function = fitness_function
         self.moves_till_stuck = moves_till_stuck
         self.show = show
+        self.hidden_layers = hidden_layers
 
         # Give this individual a number
         self.ind_number = ind_number
