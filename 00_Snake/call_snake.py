@@ -67,7 +67,8 @@ class Individual():
 
         # Create a neural network that will learn to play snake
         self.model = models.Sequential()
-        self.model.add(layers.Dense(64, activation = 'relu', input_dim = input_dim))
+        for _ in range(self.hidden_layers):
+            self.model.add(layers.Dense(64, activation = 'sigmoid', input_dim = input_dim))
         self.model.add(layers.Dense(4, activation = 'softmax'))
         if weights != None:
             self.model.set_weights(weights)
@@ -200,9 +201,12 @@ class Individual():
             snake_head_y_scaled = y1 / (dis_height - snake_block)
 
             # Create the input with the distance to food and the snake's position first
-            input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
+            if False:
+                input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
                         snake_head_x_scaled, snake_head_y_scaled]#snake head
-
+            
+            input_nn = [distance_food_y, distance_food_x, #distances to food
+                        x1, y1]
             # Transorm input intpo np.array
             input_nn = np.array(input_nn)
             # Fixing the shape so it can be used for the NN
@@ -251,13 +255,16 @@ class Population:
                  evolution_step = 0,
                  moves_till_stuck = 50,
                  show = False,
-                 **kwargs):
+                 fitness_function = lambda x,y: x*math.exp(y) ,
+                 hidden_layers = 1):
         self.individuals = []
         self.size = size
         self.verbose = verbose
         self.evolution_step = evolution_step
         self.moves_till_stuck = moves_till_stuck
         self.show = show
+        self.fitness_function = fitness_function
+        self.hidden_layers = hidden_layers
         
         
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
@@ -267,7 +274,9 @@ class Population:
                                     evolution_step  = self.evolution_step,
                                     verbose = self.verbose,
                                     moves_till_stuck = self.moves_till_stuck,
-                                    show = self.show)
+                                    show = self.show,
+                                    fitness_function = self.fitness_function,
+                                    hidden_layers = self.hidden_layers)
             
             self.individuals.append(individual)
             
@@ -352,13 +361,17 @@ class Population:
                     new_pop.append(Individual(ind_number = len(new_pop),
                                               weights = offspring1,
                                               moves_till_stuck = self.moves_till_stuck,
-                                              evolution_step = gen + 1))
+                                              evolution_step = gen + 1,
+                                              fitness_function = self.fitness_function,
+                                              hidden_layers = self.hidden_layers))
                    
                     if len(new_pop) < self.size:
                         new_pop.append(Individual(ind_number = len(new_pop),
                                                   weights = offspring1,
                                                   moves_till_stuck = self.moves_till_stuck,
-                                                  evolution_step = gen + 1))
+                                                  evolution_step = gen + 1,
+                                                  fitness_function = self.fitness_function,
+                                                  hidden_layers = self.hidden_layers))
                 
                 if elitism: #argument of evolve attribute
                     #finding worst Individual of the new population
@@ -367,7 +380,9 @@ class Population:
                     new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
                                                                    weights = elite,
                                                                    moves_till_stuck = self.moves_till_stuck,
-                                                                   evolution_step = gen + 1)
+                                                                   evolution_step = gen + 1,
+                                                                   fitness_function = self.fitness_function,
+                                                                   hidden_layers = self.hidden_layers)
                     
                 
                 self.individuals = new_pop
