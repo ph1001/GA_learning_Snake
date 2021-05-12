@@ -11,12 +11,28 @@ from snake_mutation import geometric_mutation, normal_distribution_mutation
 from snake_selection import fps, tournament, ranking
 import math
 
+<<<<<<< Updated upstream
 snakes = Population(size = 25, 
                     moves_till_stuck = 50,
                     fitness_function = lambda x,y: math.exp(y), #using exp so odds of chosing best individual as a parent increase for rbs and fbs
                     hidden_layers = 3)
 
 snakes.evolve(  gens = 500, #Number of generations to be produced
+=======
+<<<<<<< Updated upstream
+snakes = Population(size = 20, 
+                    moves_till_stuck = 50)
+
+snakes.evolve(  gens = 50, #Number of generations to be produced
+=======
+snakes = Population(size = 25, 
+                    moves_till_stuck = 200,
+                    fitness_function = lambda x,y: x*math.exp(y) if y==0 else x*math.exp(y) + 201, #using exp so odds of chosing best individual as a parent increase for rbs and fbs
+                    hidden_layers = 3)
+
+snakes.evolve(  gens = 100, #Number of generations to be produced
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 select = tournament, #Selection function
                 crossover = arithmetic_co, #Crossover function
                 mutate = geometric_mutation, #Mutation function
@@ -26,4 +42,14 @@ snakes.evolve(  gens = 500, #Number of generations to be produced
                 tournament_size = 5,
                 elitism = True, #wheter to perform elitisim
                 record_diversity = True, #wheter to record diversity
+<<<<<<< Updated upstream
                 fitness_sharing = True)
+=======
+<<<<<<< Updated upstream
+                fitness_sharing = False)
+=======
+                fitness_sharing = True)
+
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes

@@ -203,12 +203,27 @@ class Individual():
             snake_head_y_scaled = y1 / (dis_height - snake_block)
 
             # Create the input with the distance to food and the snake's position first
+<<<<<<< Updated upstream
             if False:
                 input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
                         snake_head_x_scaled, snake_head_y_scaled]#snake head
             
             input_nn = [distance_food_y, distance_food_x, #distances to food
                         x1, y1]
+=======
+<<<<<<< Updated upstream
+            input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
+                        snake_head_x_scaled, snake_head_y_scaled]#snake head
+
+=======
+            
+            input_nn = [distance_food_y_scaled, distance_food_x_scaled, #distances to food
+                        snake_head_x_scaled, snake_head_y_scaled]#snake head
+            
+            # input_nn = [distance_food_y, distance_food_x, #distances to food
+            #             x1, y1]
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
             # Transorm input intpo np.array
             input_nn = np.array(input_nn)
             # Fixing the shape so it can be used for the NN

@@ -113,16 +113,16 @@ def controlled_run_nodisplay(individual, ind_number, evolution_step, games_to_pl
 
 
             # In automatic mode: Process the action received from the NN in the same way a keyboard input would have been processed in the original version of the game
-            if game_action == 1:
+            if game_action == 0:
                 x1_change = -snake_block_nodisplay
                 y1_change = 0
-            elif game_action == 2:
+            elif game_action == 1:
                 x1_change = snake_block_nodisplay
                 y1_change = 0
-            elif game_action == 3:
+            elif game_action == 2:
                 y1_change = -snake_block_nodisplay
                 x1_change = 0
-            elif game_action == 4:
+            elif game_action == 3:
                 y1_change = snake_block_nodisplay
                 x1_change = 0
 
