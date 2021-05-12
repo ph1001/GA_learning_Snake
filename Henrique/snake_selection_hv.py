@@ -14,7 +14,8 @@ def fps(pop):
             return individual
 
 
-def tournament(pop, size=4):
+def tournament(pop, size):
+    #SHOULD WE PUT A FIXED SIZE (10%/5% of the population)?
     # Select individuals based on tournament size
     tournament = sample(pop.individuals, size)
     # Return the fittest inividuals from the sample
@@ -22,8 +23,6 @@ def tournament(pop, size=4):
 
 
 def ranking(pop):
-    # Get the total number of individuals present in the ranking
-    total_indivs = len(pop)
     # Create a ranking list
     rank_list = list(range(1, len(pop)+1))
     # Sort the individuals according to their fitness values

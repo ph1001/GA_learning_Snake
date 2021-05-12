@@ -10,10 +10,10 @@ from snake_crossover import arithmetic_co
 from snake_mutation import geometric_mutation, normal_distribution_mutation
 from snake_selection import fps, tournament, ranking
 
-snakes = Population(size = 50, 
+snakes = Population(size = 20, 
                     moves_till_stuck = 50)
 
-snakes.evolve(  gens = 500, #Number of generations to be produced
+snakes.evolve(  gens = 50, #Number of generations to be produced
                 select = tournament, #Selection function
                 crossover = arithmetic_co, #Crossover function
                 mutate = geometric_mutation, #Mutation function
