@@ -6,7 +6,7 @@ Created on Wed Apr 28 14:40:35 2021
 """
 #Functions that calculate the variance and the entropy, both phenotypic and genotypic
 
-from random import sample
+from random import sample, uniform
 from scipy.spatial.distance import euclidean
 import math
 import numpy as np
@@ -62,6 +62,84 @@ def fs(pop):
             for i, individual in enumerate(pop.individuals):
                 individual.fitness = individual.fitness / sharing_coeff[i]
                 
+def mo_selection(pop):
+    '''
+    Multiobjective optimization selection process, can be used only if the fitness function is a tuple.    
+
+    '''
+    #copying all individuals in a list s 
+    s = [(pop.individuals.index(i), i.fitness) for i in pop.individuals]
+    #Initializing the flag dictionary, the flag and the individuals
+    flag = {}
+    i = 1 
+    fit = s[0]
+    fit2 = s[1]
+    #keep iterating while the set is not empty
+    while len(s) > 0:
+        #checking if the individual is dominated
+        if fit[1][0] < fit2[1][0] and fit[1][1] < fit2[1][1]:
+            #checking if we already compare all individuals
+            if s.index(fit) == len(s) - 1:
+                #reinitializing the loop and increasing the flag
+                fit = s[0]
+                fit2 = s[1]
+                i += 1
+            #if it is checking for another individual
+            fit = s[s.index(fit) + 1 ]
+        
+        #otherwise
+        else:
+            #checking if  we already check for all individuals
+            if fit2 == s[-1]:
+                #then the individual is not-dominated, saving it in the flag dict with the right flag
+                flag[str(fit[0])] = i
+                #removing it from the list 
+                s.remove(fit)
+                #checking how many individual are left
+                if len(s) == 1:
+                    flag[str(s[0][0])] = i + 1
+                    break
+                elif len(s) == 0:
+                    break
+                else:
+                    #reinitializing the individuals
+                    fit = s[0]
+                    fit2 = s[1]
+            #otherwise
+            else:
+                #changing the individual to check for 
+                fit2 = s[s.index(fit2) + 1]
+        
+    #assinging to each ind the probability of being picked of 1 - ind.flag / sum(flag)
+    tot_flag = sum(flag.values())
+    prob = {}
+    for ind in list(flag.keys()):
+        prob[ind] = 1 - flag[ind]/tot_flag
+    
+    #sorting the probabilities dictionary
+    sorted_prob = {}
+    sorted_keys = sorted(prob, key=prob.get) 
+    for w in sorted_keys:
+        sorted_prob[w] = prob[w]
+    #selecting the two parents
+    spin = uniform(0, sum(sorted_prob.values()))
+    position = 0
+    for individual in sorted_prob.keys():
+        position += sorted_prob[individual]
+        if position > spin:
+            index1 = individual
+            break
+        
+    spin = uniform(0, sum(sorted_prob.values()))
+    position = 0
+    # Find individual in the position of the spin
+    for individual in sorted_prob.keys():
+        position += sorted_prob[individual]
+        if position > spin:
+            index2 = individual
+            break
+    return pop.individuals[int(index1)], pop.individuals[int(index2)]
+
                     
             
     

@@ -41,5 +41,8 @@ def ranking(pop):
             return individual
 
 
+    
+            
+                
 
 

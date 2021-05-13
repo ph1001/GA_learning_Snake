@@ -29,7 +29,10 @@ from random import random, randint
 from tqdm import tqdm
 from operator import  attrgetter
 import math
-from utils import phen_variance, gen_variance, phen_entropy, gen_entropy, fs
+from utils import phen_variance, gen_variance, phen_entropy, gen_entropy, fs, mo_selection
+import os
+import csv
+
 
 # Class Individual. Instances of this class play snake and make up a population.
 class Individual():
@@ -286,6 +289,36 @@ class Population:
     def __repr__(self):
         return f"Population(size={len(self.individuals)})"
     
+    def log_bestfit(self, config_name, run_number):
+        
+        dir_path = os.path.join('data', config_name)
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+            
+        with open(os.path.join('data', config_name, f'{config_name}_{run_number}.csv'), mode = 'a', newline='') as file:
+            
+            writer = csv.writer(file)
+            
+            for gen, best_fit in enumerate(self.evolution_process):
+                writer.writerow([gen, best_fit])
+
+    def log_diversity(self, config_name, run_number):
+        
+            dir_path = os.path.join('data', config_name)
+            if not os.path.exists(dir_path):
+                os.mkdir(dir_path)
+                
+            with open(os.path.join('data', config_name, f'{config_name}_{run_number}.csv'), mode = 'a', newline='') as file:
+                
+                writer = csv.writer(file)
+                
+                for gen in range(self.evolution_step):
+                    writer.writerow([gen,
+                                     self.phen_variance_dict[str(self.evolution_step)],
+                                     self.gen_variance_dict[str(self.evolution_step)],
+                                     self.phen_entropy_dict[str(self.evolution_step)],
+                                     self.gen_entropy_dict[str(self.evolution_step)],])
+    
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
     def evolve( self,
                 gens, #Number of generations to be produced
@@ -294,9 +327,10 @@ class Population:
                 mutate, #Mutation function
                 co_p, #crossover probability
                 mu_p, #mutation probability
+                multi_objective = False, #wheter to perform multiobjective optimization (fitness has to be a tuple)
                 tournament_size = None, #size of the sample for the tournament selction
                 constant_ms = None, #Geometric Mutation coefficient 
-                elitism = False, #wheter to perform elitisim
+                elitism = False, #wheter to perform elitisim, cannot be used with multiobjective optimization 
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = False): #wheter to perform fitness sharing
         
@@ -331,10 +365,14 @@ class Population:
                     
                 new_pop = []
                 while len(new_pop) < self.size:
-                    if tournament_size != None:
-                        parent1, parent2 = select(self, tournament_size), select(self, tournament_size)
+                    #selection
+                    if multi_objective:
+                        parent1, parent2 = mo_selection(self)
                     else:
-                        parent1, parent2 = select(self), select(self) #argument of evolve attribute
+                        if tournament_size != None:
+                            parent1, parent2 = select(self, tournament_size), select(self, tournament_size)
+                        else:
+                            parent1, parent2 = select(self), select(self) #argument of evolve attribute
                     # Crossover
                     if random() < co_p: #argument of evolve attribute
                         offspring1, offspring2 = crossover(parent1, parent2) #argument of evolve attribute
@@ -391,8 +429,20 @@ class Population:
                 for indiv in self.individuals:
                     indiv.evolution_step = self.evolution_step
                     
+                if multi_objective:
+                    
+                    #selecting the best solution
+                    min_fit_x = min([i.fitness[0] for i in self.individuals])
+                    min_fit_y = min([i.fitness[1] for i in self.individuals])
+            
+                    #calculating the distances to the best solution
+                    distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                    #selecting the individual that is closer to the optimal solution
+                    best_fit = self.individuals[distances.index(min(distances))].fitness
+                    
+                    
+                else:
+                    best_fit = max(self, key=attrgetter("fitness")).fitness
                 
-                best_fit = max(self, key=attrgetter("fitness")).fitness
                 self.evolution_process.append(best_fit)
                 print(f'Best Individual: {best_fit}')
-            
