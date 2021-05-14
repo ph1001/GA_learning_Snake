@@ -73,7 +73,7 @@ class Individual():
         # Create a neural network that will learn to play snake
         self.model = models.Sequential()
         self.model.add(layers.Dense(16, activation = 'sigmoid', input_dim = 6))
-        # for _ in range(self.hidden_layers):
+        # for _ in range(self.hidden_layers - 1):
         #     self.model.add(layers.Dense(64, activation = 'sigmoid', input_dim = input_dim))
         self.model.add(layers.Dense(3, activation = 'softmax'))
         
@@ -139,7 +139,7 @@ class Individual():
         direction = game_state['direction']
         food = (game_state['foodx'], game_state['foody'])
         #check if going straight is clear(1) or there is an obstacle(0)
-        possible_position = (snake_Head[0] + direction[0], snake_Head[1] + direction[1])
+        possible_position = [snake_Head[0] + direction[0], snake_Head[1] + direction[1]]
         if possible_position[0] >= 400 or possible_position[1] >= 400 or possible_position[0] < 0 or possible_position[1] < 0 or possible_position in snake_List:
             clear_straight = 0
         else:
@@ -148,8 +148,8 @@ class Individual():
         #first identify what's left/right
         if direction[1] == -10: #recognize if it's moving up vertically
         
-            right = (snake_Head[0] + 10, snake_Head[1])
-            left = (snake_Head[0] - 10, snake_Head[1])
+            right = [snake_Head[0] + 10, snake_Head[1]]
+            left = [snake_Head[0] - 10, snake_Head[1]]
             
             if snake_Head[0] == food[0] and snake_Head[1] >= food[1]: #check if the food is ahead
                 food_ahead = 1
@@ -166,8 +166,8 @@ class Individual():
                 
         elif direction[1] == 10: #recognize if it's moving down vertically
         
-            right = (snake_Head[0] - 10, snake_Head[1])
-            left = (snake_Head[0] + 10, snake_Head[1])
+            right = [snake_Head[0] - 10, snake_Head[1]]
+            left = [snake_Head[0] + 10, snake_Head[1]]
 
             if snake_Head[0] == food[0] and snake_Head[1] - food[1] <= 0: #check if the food is ahead
                 food_ahead = 1
@@ -184,8 +184,8 @@ class Individual():
             
         elif  direction[0] == -10: #recognize if it's moving left horizontally
         
-            right = (snake_Head[0], snake_Head[1] - 10)
-            left = (snake_Head[0], snake_Head[1] + 10)
+            right = [snake_Head[0], snake_Head[1] - 10]
+            left = [snake_Head[0], snake_Head[1] + 10]
             
             if snake_Head[1] == food[1] and snake_Head[0] - food[0] <= 0: #check if the food is ahead
                 food_ahead = 1
@@ -202,9 +202,8 @@ class Individual():
             
         else: #recognize if it's moving right horizontally
         
-            right = (snake_Head[0], snake_Head[1] + 10)
-            left = (snake_Head[0], snake_Head[1] - 10
-                    )
+            right = [snake_Head[0], snake_Head[1] + 10]
+            left = [snake_Head[0], snake_Head[1] - 10]
             
             if snake_Head[1] == food[1] and snake_Head[0] - food[0] >= 0: #check if the food is ahead
                 food_ahead = 1
