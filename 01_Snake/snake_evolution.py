@@ -28,7 +28,7 @@ snakes.evolve(  gens = 2, #Number of generations to be produced
                 multi_objective = True, #wheter to perform multiobjective optimization (fitness has to be a tuple)
                 tournament_size = None, #size of the sample for the tournament selction
                 constant_ms = 2000, #Geometric Mutation coefficient 
-                elitism = False, #wheter to perform elitisim, cannot be used with multiobjective optimization 
+                elitism = False, #wheter to perform elitisim 
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = False) #wheter to perform fitness sharing
 

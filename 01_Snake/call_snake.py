@@ -329,7 +329,7 @@ class Population:
                 multi_objective = False, #wheter to perform multiobjective optimization (fitness has to be a tuple)
                 tournament_size = None, #size of the sample for the tournament selction
                 constant_ms = None, #Geometric Mutation coefficient 
-                elitism = False, #wheter to perform elitisim, cannot be used with multiobjective optimization 
+                elitism = False, #wheter to perform elitisim 
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = False): #wheter to perform fitness sharing
         
@@ -359,8 +359,21 @@ class Population:
                 
                 #Elitism
                 if elitism: #argument of evolve attribute
-                    #saving a deepcopy of the best individual of the population
-                    elite = max(self.individuals, key = attrgetter('fitness')).weights
+                    
+                    if multi_objective:
+                    
+                        #selecting the best solution
+                        min_fit_x = min([i.fitness[0] for i in self.individuals])
+                        min_fit_y = min([i.fitness[1] for i in self.individuals])
+                
+                        #calculating the distances to the best solution
+                        distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                        #selecting the individual that is closer to the optimal solution
+                        elite = self.individuals[distances.index(min(distances))].weights
+                    
+                    else:
+                        #saving a copy of the weights best individual of the population
+                        elite = max(self.individuals, key = attrgetter('fitness')).weights
                     
                 new_pop = []
                 while len(new_pop) < self.size:
@@ -408,15 +421,36 @@ class Population:
                                                   hidden_layers = self.hidden_layers))
                 
                 if elitism: #argument of evolve attribute
-                    #finding worst Individual of the new population
-                    least_fit = min(new_pop, key = attrgetter('fitness'))
-                    #substituting the worst individual of the new population with the best one from the previous one
-                    new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
-                                                                   weights = elite,
-                                                                   moves_till_stuck = self.moves_till_stuck,
-                                                                   evolution_step = gen + 1,
-                                                                   fitness_function = self.fitness_function,
-                                                                   hidden_layers = self.hidden_layers)
+                
+                    if multi_objective:
+                    
+                        #selecting the best solution
+                        min_fit_x = min([i.fitness[0] for i in self.individuals])
+                        min_fit_y = min([i.fitness[1] for i in self.individuals])
+                
+                        #calculating the distances to the best solution
+                        distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                        #selecting the individual that is further to the best solution
+                        least_fit = self.individuals[distances.index(max(distances))] 
+                        #substituting the worst individual of the new population with the best one from the previous one
+                        new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                       weights = elite,
+                                                                       moves_till_stuck = self.moves_till_stuck,
+                                                                       evolution_step = gen + 1,
+                                                                       fitness_function = self.fitness_function,
+                                                                       hidden_layers = self.hidden_layers)
+                        
+                    
+                    else:
+                        #finding worst Individual of the new population
+                        least_fit = min(new_pop, key = attrgetter('fitness'))
+                        #substituting the worst individual of the new population with the best one from the previous one
+                        new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                       weights = elite,
+                                                                       moves_till_stuck = self.moves_till_stuck,
+                                                                       evolution_step = gen + 1,
+                                                                       fitness_function = self.fitness_function,
+                                                                       hidden_layers = self.hidden_layers)
                     
                 
                 self.individuals = new_pop
