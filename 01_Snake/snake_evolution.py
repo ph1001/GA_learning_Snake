@@ -23,7 +23,7 @@ for run in range(RUN_NUM):
                     fitness_function = lambda x,y: x*y
                     )
     
-    snakes.evolve(  gens = 25, #Number of generations to be produced
+    snakes.evolve(  gens = 100, #Number of generations to be produced
                 select = tournament, #Selection function
                 crossover = arithmetic_co, #Crossover function
                 mutate = geometric_mutation, #Mutation function
@@ -36,5 +36,5 @@ for run in range(RUN_NUM):
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = True) #wheter to perform fitness sharing
 
-    snakes.log_bestfit_scoreage(config_name = 'fit_funct_davide', run_number = run)
+    snakes.log_bestfit(config_name = 'fit_funct_davide', run_number = run)
     # snakes.log_diversity(config_name = , run_number = run)

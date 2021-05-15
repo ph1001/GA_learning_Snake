@@ -300,21 +300,6 @@ class Population:
             for gen, best_fit in enumerate(self.evolution_process):
                 writer.writerow([gen, best_fit])
                 
-    def log_bestfit_scoreage(self, config_name, run_number):
-        
-        dir_path = os.path.join('data', config_name)
-        if not os.path.exists(dir_path):
-            os.mkdir(dir_path)
-            
-        with open(os.path.join('data', config_name, f'{config_name}_{run_number}.csv'), mode = 'a', newline='') as file:
-            
-            writer = csv.writer(file)
-            
-            for gen, best_fit in enumerate(self.evolution_process):
-                writer.writerow([gen,
-                                 best_fit,
-                                 max(self, key = attrgetter('fitness')).age,
-                                 max(self, key = attrgetter('fitness')).score])
 
     def log_diversity(self, config_name, run_number):
         
@@ -492,5 +477,5 @@ class Population:
                 else:
                     best_fit = max(self, key=attrgetter("fitness")).fitness
                 
-                self.evolution_process.append(best_fit)
+                self.evolution_process.append([best_fit, max(self, key=attrgetter("fitness")).age, max(self, key=attrgetter("fitness")).score])
                 print(f'Best Individual: {best_fit}')
