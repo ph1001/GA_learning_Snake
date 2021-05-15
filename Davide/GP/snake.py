@@ -13,7 +13,7 @@ dis_height = 400
 snake_block = 10
 
 # Define the snake's moving speed (put it really high to execute the programm at max speed)
-snake_speed = 600
+snake_speed = 10
 
 # Define some colors
 white = (255, 255, 255)

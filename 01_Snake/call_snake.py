@@ -42,16 +42,15 @@ class Individual():
                 ind_number = randint(1,9),
                 evolution_step = 1,
                 verbose = False,
-                input_dim = 53,
                 sight_dist = 3,
                 games_to_play = 1,
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
-                moves_till_stuck = 50,
+                moves_till_stuck = 100
+                ,
                 show = False, #wheter to show the snake game window
                 hidden_layers = 1):
         
-        self.input_dim = input_dim
         self.sight_dist = sight_dist
         self.games_to_play = games_to_play
         self.verbose = verbose
@@ -94,7 +93,7 @@ class Individual():
         return len(self.weights)
     
     def __repr__(self):
-        return f'Neural Network with {self.input_dim} input nodes, {self.model.layers[0].weights[1].shape[0]} hidden layer neurons and {self.model.layers[1].weights[1].shape[0]} output layer neurons'
+        return f'Neural Network with 6 input nodes, {self.model.layers[0].weights[1].shape[0]} hidden layer neurons and {self.model.layers[1].weights[1].shape[0]} output layer neurons'
          
     # Define a function that lets an individual play snake
     def play(self, show = False):
@@ -300,6 +299,22 @@ class Population:
             
             for gen, best_fit in enumerate(self.evolution_process):
                 writer.writerow([gen, best_fit])
+                
+    def log_bestfit_scoreage(self, config_name, run_number):
+        
+        dir_path = os.path.join('data', config_name)
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+            
+        with open(os.path.join('data', config_name, f'{config_name}_{run_number}.csv'), mode = 'a', newline='') as file:
+            
+            writer = csv.writer(file)
+            
+            for gen, best_fit in enumerate(self.evolution_process):
+                writer.writerow([gen,
+                                 best_fit,
+                                 max(self, key = attrgetter('fitness')).age,
+                                 max(self, key = attrgetter('fitness')).score])
 
     def log_diversity(self, config_name, run_number):
         
@@ -363,9 +378,9 @@ class Population:
                     if multi_objective:
                     
                         #selecting the best solution
-                        min_fit_x = min([i.fitness[0] for i in self.individuals])
-                        min_fit_y = min([i.fitness[1] for i in self.individuals])
-                
+                        min_fit_x = max([i.fitness[0] for i in self.individuals])
+                        min_fit_y = max([i.fitness[1] for i in self.individuals])
+                        #NEED TO NORMALIZE
                         #calculating the distances to the best solution
                         distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                         #selecting the individual that is closer to the optimal solution
@@ -465,9 +480,9 @@ class Population:
                 if multi_objective:
                     
                     #selecting the best solution
-                    min_fit_x = min([i.fitness[0] for i in self.individuals])
-                    min_fit_y = min([i.fitness[1] for i in self.individuals])
-            
+                    min_fit_x = max([i.fitness[0] for i in self.individuals])
+                    min_fit_y = max([i.fitness[1] for i in self.individuals])
+                    #NEED TO NORMALIZE
                     #calculating the distances to the best solution
                     distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                     #selecting the individual that is closer to the optimal solution

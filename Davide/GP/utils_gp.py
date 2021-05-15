@@ -38,15 +38,33 @@ def create_randomfunct(len_functions, terminals, operators, max_depth, impose_de
             
             if len(re.split('(')) == 1:
                 
-                re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else {random.choice(terminals)}' 
+                if random.random() < 0.5: #with operator
+                
+                    re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else {random.choice(terminals)}'
+                    
+                else: #without operator
+                    
+                     re += f'{terminal} if input[{funct[0]}] else {random.choice(terminals)}'
                 
             else:
                 
-                re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else {random.choice(terminals)}' +' ' + ')' * (max_depth)
+                if random.random() < 0.5:
+                
+                    re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else {random.choice(terminals)}' +' ' + ')' * (max_depth)
             
+                else:
+                    
+                    re += f'{terminal} if input[{funct[0]}] else {random.choice(terminals)}' +' ' + ')' * (max_depth)
+        
         else:
             
-            re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else('
+            if random.random() < 0.5:
+            
+                re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else('
+                
+            else:
+                
+                re += f'{terminal} if input[{funct[0]}] else('
     
     rf = eval(re)
     

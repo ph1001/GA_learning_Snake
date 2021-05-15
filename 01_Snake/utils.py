@@ -73,7 +73,7 @@ def mo_selection(pop):
     flag = {}
     i = 1 
     fit = s[0]
-    fit2 = s[1]
+    fit2 = s[1]    
     #keep iterating while the set is not empty
     while len(s) > 0:
         #checking if the individual is dominated
@@ -138,6 +138,7 @@ def mo_selection(pop):
         if position > spin:
             index2 = individual
             break
+    
     return pop.individuals[int(index1)], pop.individuals[int(index2)]
 
                     

@@ -20,9 +20,9 @@ import math
     
 snakes = Population(size = 30, 
                 moves_till_stuck = 100,
-                fitness_function = lambda x,y: x*math.exp(y),
+                fitness_function = lambda x,y: x*math.exp(y) + 101*y,
                 impose_depth = False,
-                max_depth = 5
+                max_depth = 100
                 )
 
 snakes.evolve(  gens = 1000, #Number of generations to be produced
