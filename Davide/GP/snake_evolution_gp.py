@@ -15,27 +15,27 @@ import math
 
 ## WITH THIS CONFIG APPROX 17h
 
-# RUN_NUM = 30 #number of runs to do for each config 
-# for run in range(RUN_NUM):
+RUN_NUM = 3 #number of runs to do for each config 
+for run in range(RUN_NUM):
     
-snakes = Population(size = 30, 
-                moves_till_stuck = 100,
-                fitness_function = lambda x,y: x*math.exp(y) + 101*y,
-                impose_depth = False,
-                max_depth = 100
-                )
+    snakes = Population(size = 25, 
+                    moves_till_stuck = 100,
+                    fitness_function = lambda x,y: x*y,
+                    impose_depth = False,
+                    max_depth = 100
+                    )
+    
+    snakes.evolve(  gens = 100, #Number of generations to be produced
+                    select = tournament, #Selection function
+                    crossover = gp_co, #Crossover function
+                    mutate = gp_mutation, #Mutation function
+                    co_p = 0.5, #crossover probability
+                    mu_p = 0.2, #mutation probability
+                    multi_objective = False, #wheter to perform multiobjective optimization (fitness has to be a tuple)
+                    tournament_size = 5, #size of the sample for the tournament selection
+                    elitism = True, #wheter to perform elitisim 
+                    record_diversity = False, #wheter to record diversity
+                    fitness_sharing = False) #wheter to perform fitness sharing
 
-snakes.evolve(  gens = 1000, #Number of generations to be produced
-                select = tournament, #Selection function
-                crossover = gp_co, #Crossover function
-                mutate = gp_mutation, #Mutation function
-                co_p = 0.5, #crossover probability
-                mu_p = 0.5, #mutation probability
-                multi_objective = False, #wheter to perform multiobjective optimization (fitness has to be a tuple)
-                tournament_size = 3, #size of the sample for the tournament selection
-                elitism = True, #wheter to perform elitisim 
-                record_diversity = False, #wheter to record diversity
-                fitness_sharing = False) #wheter to perform fitness sharing
-
-    # snakes.log_bestfit(config_name = 'mo_geom', run_number = run)
+    snakes.log_bestfit(config_name = 'gp_davide', run_number = run)
     # snakes.log_diversity(config_name = , run_number = run)

@@ -503,5 +503,7 @@ class Population:
                 else:
                     best_fit = max(self, key=attrgetter("fitness")).fitness
                 
-                self.evolution_process.append(best_fit)
+                self.evolution_process.append([best_fit,
+                                               max(self, key=attrgetter("fitness")).age,
+                                               max(self, key=attrgetter("fitness")).score])
                 print(f'Best Individual: {best_fit}')
