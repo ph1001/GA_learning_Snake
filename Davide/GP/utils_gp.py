@@ -21,6 +21,9 @@ def create_randomfunct(len_functions, terminals, operators, max_depth, impose_de
     max_depth = integer
 
     '''
+    
+    negation1 = random.choice(['',  'not'])
+    negation2 = random.choice(['',  'not'])
         
     re = 'lambda input: '
     
@@ -40,31 +43,31 @@ def create_randomfunct(len_functions, terminals, operators, max_depth, impose_de
                 
                 if random.random() < 0.5: #with operator
                 
-                    re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else {random.choice(terminals)}'
+                    re += f'{terminal} if {negation1} input[{funct[0]}] {operator} {negation2} input[{funct[1]}] else {random.choice(terminals)}'
                     
                 else: #without operator
                     
-                     re += f'{terminal} if input[{funct[0]}] else {random.choice(terminals)}'
+                     re += f'{terminal} if {negation1} input[{funct[0]}] else {random.choice(terminals)}'
                 
             else:
                 
                 if random.random() < 0.5:
                 
-                    re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else {random.choice(terminals)}' +' ' + ')' * (max_depth)
+                    re += f'{terminal} if {negation1} input[{funct[0]}] {operator} {negation2} input[{funct[1]}] else {random.choice(terminals)}' +' ' + ')' * (max_depth)
             
                 else:
                     
-                    re += f'{terminal} if input[{funct[0]}] else {random.choice(terminals)}' +' ' + ')' * (max_depth)
+                    re += f'{terminal} if {negation1} input[{funct[0]}] else {random.choice(terminals)}' +' ' + ')' * (max_depth)
         
         else:
             
             if random.random() < 0.5:
             
-                re += f'{terminal} if input[{funct[0]}] {operator} input[{funct[1]}] else('
+                re += f'{terminal} if {negation1} input[{funct[0]}] {operator} {negation2} input[{funct[1]}] else('
                 
             else:
                 
-                re += f'{terminal} if input[{funct[0]}] else('
+                re += f'{terminal} if {negation1} input[{funct[0]}] else('
     
     rf = eval(re)
     
