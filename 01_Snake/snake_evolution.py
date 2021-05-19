@@ -20,7 +20,7 @@ for run in range(RUN_NUM):
     
     snakes = Population(size = 25, 
                     moves_till_stuck = 100,
-                    fitness_function = lambda x,y: x*y
+                    fitness_function = lambda x,y: x*math.exp(y) + 101*y
                     )
     
     snakes.evolve(  gens = 100, #Number of generations to be produced
@@ -36,5 +36,5 @@ for run in range(RUN_NUM):
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = True) #wheter to perform fitness sharing
 
-    snakes.log_bestfit(config_name = 'fit_funct_davide', run_number = run)
+    snakes.log_bestfit(config_name = 'fit_funct_henrique', run_number = run+10)
     # snakes.log_diversity(config_name = , run_number = run)
