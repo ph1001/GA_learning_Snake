@@ -249,6 +249,7 @@ class Population:
     
     def __init__(self, 
                  size,
+                 optim, #either 'min' or 'max'
                  verbose = False,
                  evolution_step = 0,
                  moves_till_stuck = 50,
@@ -263,6 +264,7 @@ class Population:
         self.show = show
         self.fitness_function = fitness_function
         self.hidden_layers = hidden_layers
+        self.optim = optim
         
         
         # Create individuals and add them to the population. Creating an individual will execute the __init__ function 
@@ -359,21 +361,41 @@ class Population:
                 
                 #Elitism
                 if elitism: #argument of evolve attribute
+                
+                    if self.optim == 'max':
                     
-                    if multi_objective:
-                    
-                        #selecting the best solution
-                        min_fit_x = max([i.fitness[0] for i in self.individuals])
-                        min_fit_y = max([i.fitness[1] for i in self.individuals])
-                        #NEED TO NORMALIZE
-                        #calculating the distances to the best solution
-                        distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
-                        #selecting the individual that is closer to the optimal solution
-                        elite = self.individuals[distances.index(min(distances))].weights
+                        if multi_objective:
+                        
+                            #selecting the best solution
+                            min_fit_x = max([i.fitness[0] for i in self.individuals])
+                            min_fit_y = max([i.fitness[1] for i in self.individuals])
+                            #NEED TO NORMALIZE
+                            #calculating the distances to the best solution
+                            distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                            #selecting the individual that is closer to the optimal solution
+                            elite = self.individuals[distances.index(min(distances))].weights
+                        
+                        else:
+                            #saving a copy of the weights best individual of the population
+                            elite = max(self.individuals, key = attrgetter('fitness')).weights
                     
                     else:
-                        #saving a copy of the weights best individual of the population
-                        elite = max(self.individuals, key = attrgetter('fitness')).weights
+                        
+                        if multi_objective:
+                        
+                            #selecting the best solution
+                            min_fit_x = min([i.fitness[0] for i in self.individuals])
+                            min_fit_y = min([i.fitness[1] for i in self.individuals])
+                            #NEED TO NORMALIZE
+                            #calculating the distances to the best solution
+                            distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                            #selecting the individual that is closer to the optimal solution
+                            elite = self.individuals[distances.index(min(distances))].weights
+                        
+                        else:
+                            #saving a copy of the weights best individual of the population
+                            elite = min(self.individuals, key = attrgetter('fitness')).weights
+                        
                     
                 new_pop = []
                 while len(new_pop) < self.size:
@@ -422,36 +444,69 @@ class Population:
                 
                 if elitism: #argument of evolve attribute
                 
-                    if multi_objective:
-                    
-                        #selecting the best solution
-                        min_fit_x = min([i.fitness[0] for i in self.individuals])
-                        min_fit_y = min([i.fitness[1] for i in self.individuals])
+                    if self.optim == 'max':
                 
-                        #calculating the distances to the best solution
-                        distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
-                        #selecting the individual that is further to the best solution
-                        least_fit = self.individuals[distances.index(max(distances))] 
-                        #substituting the worst individual of the new population with the best one from the previous one
-                        new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
-                                                                       weights = elite,
-                                                                       moves_till_stuck = self.moves_till_stuck,
-                                                                       evolution_step = gen + 1,
-                                                                       fitness_function = self.fitness_function,
-                                                                       hidden_layers = self.hidden_layers)
+                        if multi_objective:
                         
+                            #selecting the best solution
+                            min_fit_x = max([i.fitness[0] for i in self.individuals])
+                            min_fit_y = max([i.fitness[1] for i in self.individuals])
+                    
+                            #calculating the distances to the best solution
+                            distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                            #selecting the individual that is further to the best solution
+                            least_fit = self.individuals[distances.index(max(distances))] 
+                            #substituting the worst individual of the new population with the best one from the previous one
+                            new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                           weights = elite,
+                                                                           moves_till_stuck = self.moves_till_stuck,
+                                                                           evolution_step = gen + 1,
+                                                                           fitness_function = self.fitness_function,
+                                                                           hidden_layers = self.hidden_layers)
+                            
+                        
+                        else:
+                            #finding worst Individual of the new population
+                            least_fit = min(new_pop, key = attrgetter('fitness'))
+                            #substituting the worst individual of the new population with the best one from the previous one
+                            new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                           weights = elite,
+                                                                           moves_till_stuck = self.moves_till_stuck,
+                                                                           evolution_step = gen + 1,
+                                                                           fitness_function = self.fitness_function,
+                                                                           hidden_layers = self.hidden_layers)
                     
                     else:
-                        #finding worst Individual of the new population
-                        least_fit = min(new_pop, key = attrgetter('fitness'))
-                        #substituting the worst individual of the new population with the best one from the previous one
-                        new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
-                                                                       weights = elite,
-                                                                       moves_till_stuck = self.moves_till_stuck,
-                                                                       evolution_step = gen + 1,
-                                                                       fitness_function = self.fitness_function,
-                                                                       hidden_layers = self.hidden_layers)
+                        
+                        if multi_objective:
+                        
+                            #selecting the best solution
+                            min_fit_x = min([i.fitness[0] for i in self.individuals])
+                            min_fit_y = min([i.fitness[1] for i in self.individuals])
                     
+                            #calculating the distances to the best solution
+                            distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                            #selecting the individual that is further to the best solution
+                            least_fit = self.individuals[distances.index(max(distances))] 
+                            #substituting the worst individual of the new population with the best one from the previous one
+                            new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                           weights = elite,
+                                                                           moves_till_stuck = self.moves_till_stuck,
+                                                                           evolution_step = gen + 1,
+                                                                           fitness_function = self.fitness_function,
+                                                                           hidden_layers = self.hidden_layers)
+                            
+                        
+                        else:
+                            #finding worst Individual of the new population
+                            least_fit = max(new_pop, key = attrgetter('fitness'))
+                            #substituting the worst individual of the new population with the best one from the previous one
+                            new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
+                                                                           weights = elite,
+                                                                           moves_till_stuck = self.moves_till_stuck,
+                                                                           evolution_step = gen + 1,
+                                                                           fitness_function = self.fitness_function,
+                                                                           hidden_layers = self.hidden_layers)
                 
                 self.individuals = new_pop
                 
@@ -461,21 +516,47 @@ class Population:
                 self.evolution_step += 1
                 for indiv in self.individuals:
                     indiv.evolution_step = self.evolution_step
-                    
-                if multi_objective:
-                    
-                    #selecting the best solution
-                    min_fit_x = max([i.fitness[0] for i in self.individuals])
-                    min_fit_y = max([i.fitness[1] for i in self.individuals])
-                    #NEED TO NORMALIZE
-                    #calculating the distances to the best solution
-                    distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
-                    #selecting the individual that is closer to the optimal solution
-                    best_fit = self.individuals[distances.index(min(distances))].fitness
-                    
-                    
-                else:
-                    best_fit = max(self, key=attrgetter("fitness")).fitness
                 
-                self.evolution_process.append([best_fit, max(self, key=attrgetter("fitness")).age, max(self, key=attrgetter("fitness")).score])
+                if self.optim == 'max':
+                    
+                    if multi_objective:
+                        
+                        #selecting the best solution
+                        min_fit_x = max([i.fitness[0] for i in self.individuals])
+                        min_fit_y = max([i.fitness[1] for i in self.individuals])
+                        #NEED TO NORMALIZE
+                        #calculating the distances to the best solution
+                        distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                        #selecting the individual that is closer to the optimal solution
+                        best_fit = self.individuals[distances.index(min(distances))].fitness
+                        
+                        
+                    else:
+                        best_fit = max(self, key=attrgetter("fitness")).fitness
+                        
+                else:
+                    
+                    if multi_objective:
+                        
+                        #selecting the best solution
+                        min_fit_x = min([i.fitness[0] for i in self.individuals])
+                        min_fit_y = min([i.fitness[1] for i in self.individuals])
+                        #NEED TO NORMALIZE
+                        #calculating the distances to the best solution
+                        distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
+                        #selecting the individual that is closer to the optimal solution
+                        best_fit = self.individuals[distances.index(min(distances))].fitness
+                        
+                        
+                    else:
+                        best_fit = min(self, key=attrgetter("fitness")).fitness
+                
+                if self.optim == 'max':
+                    
+                    self.evolution_process.append([best_fit, max(self, key=attrgetter("fitness")).age, max(self, key=attrgetter("fitness")).score])
+                
+                else:
+                    
+                    self.evolution_process.append([best_fit, min(self, key=attrgetter("fitness")).age, min(self, key=attrgetter("fitness")).score])
+                
                 print(f'Best Individual: {best_fit}')

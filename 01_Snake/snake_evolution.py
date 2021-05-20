@@ -20,7 +20,8 @@ for run in range(RUN_NUM):
     
     snakes = Population(size = 25, 
                     moves_till_stuck = 100,
-                    fitness_function = lambda x,y: x*math.exp(y) + 101*y
+                    fitness_function = lambda x,y: x*math.exp(y) + 101*y,
+                    optim = 'max'
                     )
     
     snakes.evolve(  gens = 100, #Number of generations to be produced
