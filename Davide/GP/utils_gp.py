@@ -10,6 +10,7 @@ from scipy.spatial.distance import euclidean
 import math
 import numpy as np
 
+
 def create_randomfunct(len_functions, terminals, operators, max_depth, impose_depth = False):
     '''
     len_functions = len of a list of True or False (1 or 0) that will be the input
