@@ -81,41 +81,82 @@ def mo_selection(pop):
     i = 1 
     fit = s[0]
     fit2 = s[1]    
-    #keep iterating while the set is not empty
-    while len(s) > 0:
-        #checking if the individual is dominated
-        if fit[1][0] < fit2[1][0] and fit[1][1] < fit2[1][1]:
-            #checking if we already compare all individuals
-            if s.index(fit) == len(s) - 1:
-                #reinitializing the loop and increasing the flag
-                fit = s[0]
-                fit2 = s[1]
-                i += 1
-            #if it is checking for another individual
-            fit = s[s.index(fit) + 1 ]
-        
-        #otherwise
-        else:
-            #checking if  we already check for all individuals
-            if fit2 == s[-1]:
-                #then the individual is not-dominated, saving it in the flag dict with the right flag
-                flag[str(fit[0])] = i
-                #removing it from the list 
-                s.remove(fit)
-                #checking how many individual are left
-                if len(s) == 1:
-                    flag[str(s[0][0])] = i + 1
-                    break
-                elif len(s) == 0:
-                    break
-                else:
-                    #reinitializing the individuals
+    
+    if pop.optim = 'max':
+    
+        #keep iterating while the set is not empty
+        while len(s) > 0:
+            #checking if the individual is dominated
+            if fit[1][0] < fit2[1][0] and fit[1][1] < fit2[1][1]:
+                #checking if we already compare all individuals
+                if s.index(fit) == len(s) - 1:
+                    #reinitializing the loop and increasing the flag
                     fit = s[0]
                     fit2 = s[1]
+                    i += 1
+                #if it is checking for another individual
+                fit = s[s.index(fit) + 1 ]
+            
             #otherwise
             else:
-                #changing the individual to check for 
-                fit2 = s[s.index(fit2) + 1]
+                #checking if  we already check for all individuals
+                if fit2 == s[-1]:
+                    #then the individual is not-dominated, saving it in the flag dict with the right flag
+                    flag[str(fit[0])] = i
+                    #removing it from the list 
+                    s.remove(fit)
+                    #checking how many individual are left
+                    if len(s) == 1:
+                        flag[str(s[0][0])] = i + 1
+                        break
+                    elif len(s) == 0:
+                        break
+                    else:
+                        #reinitializing the individuals
+                        fit = s[0]
+                        fit2 = s[1]
+                #otherwise
+                else:
+                    #changing the individual to check for 
+                    fit2 = s[s.index(fit2) + 1]
+                    
+    else:
+        
+        #keep iterating while the set is not empty
+        while len(s) > 0:
+            #checking if the individual is dominated
+            if fit[1][0] > fit2[1][0] and fit[1][1] > fit2[1][1]:
+                #checking if we already compare all individuals
+                if s.index(fit) == len(s) - 1:
+                    #reinitializing the loop and increasing the flag
+                    fit = s[0]
+                    fit2 = s[1]
+                    i += 1
+                #if it is checking for another individual
+                fit = s[s.index(fit) + 1 ]
+            
+            #otherwise
+            else:
+                #checking if  we already check for all individuals
+                if fit2 == s[-1]:
+                    #then the individual is not-dominated, saving it in the flag dict with the right flag
+                    flag[str(fit[0])] = i
+                    #removing it from the list 
+                    s.remove(fit)
+                    #checking how many individual are left
+                    if len(s) == 1:
+                        flag[str(s[0][0])] = i + 1
+                        break
+                    elif len(s) == 0:
+                        break
+                    else:
+                        #reinitializing the individuals
+                        fit = s[0]
+                        fit2 = s[1]
+                #otherwise
+                else:
+                    #changing the individual to check for 
+                    fit2 = s[s.index(fit2) + 1]
         
     #assinging to each ind the probability of being picked of 1 - ind.flag / sum(flag)
     tot_flag = sum(flag.values())
