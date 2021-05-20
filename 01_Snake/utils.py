@@ -60,7 +60,14 @@ def fs(pop):
                 sharing_coeff.append( sum(distance_matrix[i] + distance_matrix.T[i]) )
             #updating the individuals fitness
             for i, individual in enumerate(pop.individuals):
-                individual.fitness = individual.fitness / sharing_coeff[i]
+                
+                if pop.optim = 'max':
+                    
+                    individual.fitness = individual.fitness / sharing_coeff[i]
+                
+                else: 
+                    
+                    individual.fitness = individual.fitness * sharing_coeff[i]
                 
 def mo_selection(pop):
     '''
