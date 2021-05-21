@@ -61,7 +61,7 @@ def fs(pop):
             #updating the individuals fitness
             for i, individual in enumerate(pop.individuals):
                 
-                if pop.optim = 'max':
+                if pop.optim == 'max':
                     
                     individual.fitness = individual.fitness / sharing_coeff[i]
                 
@@ -82,7 +82,7 @@ def mo_selection(pop):
     fit = s[0]
     fit2 = s[1]    
     
-    if pop.optim = 'max':
+    if pop.optim == 'max':
     
         #keep iterating while the set is not empty
         while len(s) > 0:
