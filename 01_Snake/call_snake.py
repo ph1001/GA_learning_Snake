@@ -315,10 +315,10 @@ class Population:
                 
                 for gen in range(self.evolution_step):
                     writer.writerow([gen,
-                                     self.phen_variance_dict[str(self.evolution_step)],
-                                     self.gen_variance_dict[str(self.evolution_step)],
-                                     self.phen_entropy_dict[str(self.evolution_step)],
-                                     self.gen_entropy_dict[str(self.evolution_step)],])
+                                     self.phen_variance_dict[str(gen)],
+                                     self.gen_variance_dict[str(gen)],
+                                     self.phen_entropy_dict[str(gen)],
+                                     self.gen_entropy_dict[str(gen)],])
     
     # Define a funcion that receives a population and evolves it using a GA. It also receives evolution_step to keep track of where we are at in the process.
     def evolve( self,
