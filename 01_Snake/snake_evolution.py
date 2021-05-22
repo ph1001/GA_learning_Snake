@@ -15,7 +15,7 @@ import math
 
 ## WITH THIS CONFIG APPROX 17h
 
-RUN_NUM = 10 #number of runs to do for each config 
+RUN_NUM = 15 #number of runs to do for each config 
 for run in range(RUN_NUM):
     
     snakes = Population(size = 25, 
@@ -34,8 +34,8 @@ for run in range(RUN_NUM):
                 tournament_size = 5, #size of the sample for the tournament selction
                 constant_ms = 2000, #Geometric Mutation coefficient 
                 elitism = True, #wheter to perform elitisim 
-                record_diversity = False, #wheter to record diversity
+                record_diversity = True, #wheter to record diversity
                 fitness_sharing = True) #wheter to perform fitness sharing
 
-    snakes.log_bestfit(config_name = 'fit_funct_henrique', run_number = run+10)
-    # snakes.log_diversity(config_name = , run_number = run)
+    snakes.log_bestfit(config_name = 'fit_funct_henrique_recorddiv_on_fit', run_number = run+15)
+    snakes.log_diversity(config_name = 'fit_funct_henrique_recorddiv_on_div', run_number = run+15)
