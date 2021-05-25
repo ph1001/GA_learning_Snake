@@ -455,7 +455,7 @@ class Population:
                             #calculating the distances to the best solution
                             distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                             #selecting the individual that is further to the best solution
-                            least_fit = new_pop.individuals[distances.index(max(distances))] 
+                            least_fit = self.individuals[distances.index(max(distances))] 
                             #substituting the worst individual of the new population with the best one from the previous one
                             new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
                                                                            weights = elite,
@@ -487,7 +487,7 @@ class Population:
                             #calculating the distances to the best solution
                             distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                             #selecting the individual that is further to the best solution
-                            least_fit = new_pop.individuals[distances.index(max(distances))] 
+                            least_fit = self.individuals[distances.index(max(distances))] 
                             #substituting the worst individual of the new population with the best one from the previous one
                             new_pop[new_pop.index(least_fit)] = Individual(ind_number = new_pop.index(least_fit),
                                                                            weights = elite,

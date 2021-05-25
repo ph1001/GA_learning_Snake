@@ -18,23 +18,23 @@ import math
 RUN_NUM = 15 #number of runs to do for each config 
 for run in range(RUN_NUM):
     
-    snakes = Population(size = 25, 
+    snakes = Population(size = 2, 
                     moves_till_stuck = 100,
-                    fitness_function = lambda x,y: x*math.exp(y) + 101*y,
+                    fitness_function = lambda x,y: (x,y),
                     optim = 'max'
                     )
     
-    snakes.evolve(  gens = 100, #Number of generations to be produced
+    snakes.evolve(  gens = 2, #Number of generations to be produced
                 select = tournament, #Selection function
                 crossover = arithmetic_co, #Crossover function
                 mutate = geometric_mutation, #Mutation function
                 co_p = 0.5, #crossover probability
                 mu_p = 0.2, #mutation probability
-                multi_objective = False, #wheter to perform multiobjective optimization (fitness has to be a tuple)
-                tournament_size = 5, #size of the sample for the tournament selction
+                multi_objective = True, #wheter to perform multiobjective optimization (fitness has to be a tuple)
+                tournament_size = 2, #size of the sample for the tournament selction
                 constant_ms = 2000, #Geometric Mutation coefficient 
                 elitism = True, #wheter to perform elitisim 
-                record_diversity = True, #wheter to record diversity
+                record_diversity = False, #wheter to record diversity
                 fitness_sharing = True) #wheter to perform fitness sharing
 
     snakes.log_bestfit(config_name = 'fit_funct_henrique_recorddiv_on_fit', run_number = run+15)
