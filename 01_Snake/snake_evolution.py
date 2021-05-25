@@ -33,9 +33,9 @@ for run in range(RUN_NUM):
                 multi_objective = False, #wheter to perform multiobjective optimization (fitness has to be a tuple)
                 tournament_size = 5, #size of the sample for the tournament selction
                 constant_ms = 2000, #Geometric Mutation coefficient 
-                elitism = True, #wheter to perform elitisim 
-                record_diversity = True, #wheter to record diversity
+                elitism = False, #wheter to perform elitisim 
+                record_diversity = False, #wheter to record diversity
                 fitness_sharing = True) #wheter to perform fitness sharing
 
-    snakes.log_bestfit(config_name = 'fit_funct_henrique_recorddiv_on_fit', run_number = run+15)
-    snakes.log_diversity(config_name = 'fit_funct_henrique_recorddiv_on_div', run_number = run+15)
+    snakes.log_bestfit(config_name = 'fit_funct_henrique_elitism_off_fit', run_number = run+15)
+    # snakes.log_diversity(config_name = 'fit_funct_henrique_recorddiv_on_div', run_number = run)
