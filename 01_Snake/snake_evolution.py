@@ -18,13 +18,13 @@ import math
 RUN_NUM = 15 #number of runs to do for each config 
 for run in range(RUN_NUM):
     
-    snakes = Population(size = 2, 
+    snakes = Population(size = 25, 
                     moves_till_stuck = 100,
                     fitness_function = lambda x,y: (x,y),
                     optim = 'max'
                     )
     
-    snakes.evolve(  gens = 2, #Number of generations to be produced
+    snakes.evolve(  gens = 100, #Number of generations to be produced
                 select = tournament, #Selection function
                 crossover = arithmetic_co, #Crossover function
                 mutate = geometric_mutation, #Mutation function
@@ -37,5 +37,5 @@ for run in range(RUN_NUM):
                 record_diversity = False, #wheter to record diversity
                 fitness_sharing = True) #wheter to perform fitness sharing
 
-    snakes.log_bestfit(config_name = 'fit_funct_henrique_recorddiv_on_fit', run_number = run+15)
-    snakes.log_diversity(config_name = 'fit_funct_henrique_recorddiv_on_div', run_number = run+15)
+    snakes.log_bestfit(config_name = 'fit_funct_henrique_mo_on_fit', run_number = run+15)
+    # snakes.log_diversity(config_name = 'fit_funct_henrique_recorddiv_on_div', run_number = run)
