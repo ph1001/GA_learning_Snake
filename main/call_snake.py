@@ -42,7 +42,6 @@ class Individual():
                 ind_number = randint(1,9),
                 evolution_step = 1,
                 verbose = False,
-                sight_dist = 3,
                 games_to_play = 1,
                 fitness_function = lambda x,y: x*math.exp(y) ,
                 weights = None,
@@ -51,7 +50,6 @@ class Individual():
                 show = False, #wheter to show the snake game window
                 hidden_layers = 1):
         
-        self.sight_dist = sight_dist
         self.games_to_play = games_to_play
         self.verbose = verbose
         self.fitness_function = fitness_function
