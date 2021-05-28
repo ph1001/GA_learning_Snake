@@ -5,19 +5,6 @@ Created on Mon Apr 26 16:36:47 2021
 @author: utente
 """
 
-#
-#
-#
-# Run everything by running this script.
-# For me it works best to click "Run" -> "Run Without Debugging" for that.
-# Also the game window always opend behind the editor for some reason.
-#
-# Please not that right now 'moves_till_stuck' is set to 100, which is quite low.
-# This can be changed in snake.py.
-#
-#
-#
-
 # This script is heavily inspired by this blogpost: https://thingsidobysanil.wordpress.com/2018/11/12/87/
 
 # Import libraries and components from snake
