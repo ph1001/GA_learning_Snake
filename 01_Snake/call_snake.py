@@ -137,12 +137,15 @@ class Individual():
         snake_Head = game_state['snake_Head']
         direction = game_state['direction']
         food = (game_state['foodx'], game_state['foody'])
+        
         #check if going straight is clear(1) or there is an obstacle(0)
         possible_position = [snake_Head[0] + direction[0], snake_Head[1] + direction[1]]
+        
         if possible_position[0] >= 400 or possible_position[1] >= 400 or possible_position[0] < 0 or possible_position[1] < 0 or possible_position in snake_List:
             clear_straight = 0
         else:
             clear_straight = 1
+        
         #checking if it's clear right or left
         #first identify what's left/right
         if direction[1] == -10: #recognize if it's moving up vertically
@@ -230,6 +233,7 @@ class Individual():
         else:
             clear_left = 1
         
+        #creating the input for the neural network
         input_nn = np.array([
                     clear_straight, clear_right, clear_left,
                     food_ahead, food_right, food_left
@@ -237,6 +241,7 @@ class Individual():
         
         input_nn.shape = (1,6)
         
+        #deciding the next move
         game_action = np.argmax(self.model.predict(input_nn))
         
         if self.verbose:
@@ -369,7 +374,6 @@ class Population:
                             #selecting the best solution
                             min_fit_x = max([i.fitness[0] for i in self.individuals])
                             min_fit_y = max([i.fitness[1] for i in self.individuals])
-                            #NEED TO NORMALIZE
                             #calculating the distances to the best solution
                             distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                             #selecting the individual that is closer to the optimal solution
@@ -386,7 +390,6 @@ class Population:
                             #selecting the best solution
                             min_fit_x = min([i.fitness[0] for i in self.individuals])
                             min_fit_y = min([i.fitness[1] for i in self.individuals])
-                            #NEED TO NORMALIZE
                             #calculating the distances to the best solution
                             distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                             #selecting the individual that is closer to the optimal solution
@@ -524,7 +527,6 @@ class Population:
                         #selecting the best solution
                         min_fit_x = max([i.fitness[0] for i in self.individuals])
                         min_fit_y = max([i.fitness[1] for i in self.individuals])
-                        #NEED TO NORMALIZE
                         #calculating the distances to the best solution
                         distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                         #selecting the individual that is closer to the optimal solution
@@ -541,7 +543,6 @@ class Population:
                         #selecting the best solution
                         min_fit_x = min([i.fitness[0] for i in self.individuals])
                         min_fit_y = min([i.fitness[1] for i in self.individuals])
-                        #NEED TO NORMALIZE
                         #calculating the distances to the best solution
                         distances = [ math.sqrt((i.fitness[0] - min_fit_x)**2) + math.sqrt((i.fitness[1] - min_fit_y)**2) for i in self.individuals]
                         #selecting the individual that is closer to the optimal solution

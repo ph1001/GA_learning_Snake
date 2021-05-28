@@ -13,7 +13,6 @@ import math
  
 
 
-## WITH THIS CONFIG APPROX 17h
 
 RUN_NUM = 15 #number of runs to do for each config 
 for run in range(RUN_NUM):
