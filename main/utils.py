@@ -67,7 +67,9 @@ def fs(pop):
                 
                 else: 
                     
-                    individual.fitness = individual.fitness * sharing_coeff[i]
+                    individual.fitness = individual.fitness * int(sharing_coeff[i]) 
+                    
+
                 
 def mo_selection(pop):
     '''
